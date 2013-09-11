@@ -1,0 +1,94 @@
+# Blender MTL File: 'None'
+# Material Count: 8
+newmtl Cabinet
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.567232 0.567232 0.567232
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+
+newmtl CupPlate_CupPlateDiffuceMap.jpg_CupPlateDiffuceMap.jpg
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.376320 0.376320 0.376320
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd CupPlateDiffuceMap.jpg
+map_Bump CupPlateNormalsMap.jpg
+map_Ka CupPlateDiffuceMap.jpg
+
+
+newmtl Foor_FloorDiffuce.jpg_FloorDiffuce.jpg
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.376320 0.376320 0.376320
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd FloorDiffuce.jpg
+map_Ka FloorDiffuce.jpg
+
+
+newmtl Light
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+
+newmtl WallColor_WallColorDiffuce.jpg_WallColorDiffuce.jpg
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.376320 0.376320 0.376320
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd WallColorDiffuce.jpg
+map_Ka WallColorDiffuce.jpg
+
+
+newmtl WhiteWall
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.582272 0.582272 0.582272
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+
+newmtl WoodWall_WoodWallDiffuce.jpg_WoodWallDiffuce.jpg
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.376448 0.376448 0.376448
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd WoodWallDiffuce.jpg
+map_Bump WoodWallNormal.jpg
+map_Ka WoodWallDiffuce.jpg
+
+
+newmtl Wood_WoodDiffuce.jpg_WoodDiffuce.jpg
+Ns 3.921569
+Ka 0.000000 0.000000 0.000000
+Kd 0.376320 0.376320 0.376320
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd WoodDiffuce.jpg
+map_Ka WoodDiffuce.jpg
+
+
