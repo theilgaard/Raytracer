@@ -206,7 +206,7 @@ void makeSimpleScene(){
 	//g_image->resize(700, 512);
 
 	// set up the camera
-	g_camera->setBGColor(Vector3(0.0f, 0.0f, 0.0f));
+	g_camera->setBGColor(Vector3(0.1f));
 	g_camera->setEye(Vector3(-2.6, 1.7, 0.4));
 	g_camera->setLookAt(Vector3(2.1, 1.3, -1.2));
 	g_camera->setUp(Vector3(0, 1, 0));
@@ -216,17 +216,17 @@ void makeSimpleScene(){
 	PointLight * light = new PointLight;
 	light->setPosition(lightPos);
 	light->setColor(Vector3(1, 1, 1));
-	light->setWattage(1000);
+	light->setWattage(1500);
 	g_scene->addLight(light);
 
 	
-	ShadingModel* material = new ShadingModel(Vector3(.0f), 0, Vector3(0.6,.0, .0), Vector3(0.0f), Vector3(0.0f));
-	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 0, Vector3(0.0, 0.0, .6), Vector3(0.6f), Vector3(0.0f));
+	ShadingModel* material = new ShadingModel(Vector3(.0f), 0, Vector3(0.4,.0, .0), Vector3(0.6f), Vector3(0.0f));
+	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 0, Vector3(0.0, 0.0, .4), Vector3(0.6f), Vector3(0.0f));
 	TriangleMesh * object = new TriangleMesh;
 
 	// Custom Object
 	object->setDefaultMaterial(material);
-	object->load("objects/teapot.obj");
+	object->load("objects/bunny_smooth.obj");
 	g_scene->addMesh(object);
 
 	// Floor triangle
