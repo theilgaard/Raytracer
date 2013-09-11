@@ -155,4 +155,4 @@ $RECYCLE.BIN/
 
 
 # Ignore .ppm images
-.ppm
+*.ppm
