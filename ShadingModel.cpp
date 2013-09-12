@@ -9,7 +9,7 @@
 using namespace std;
 
 ShadingModel::ShadingModel(const Vector3 & ambient, float refrationIndex, const Vector3 & diffuse, const Vector3 & specular, const Vector3 & refrationcolor) :
-	m_ka(ambient), maxBounces(3), eta(refrationIndex), outsideEta(-1.0f), Rd(diffuse), Rs(specular), Rt(refrationcolor)
+	m_ka(ambient), maxBounces(6), eta(refrationIndex), outsideEta(-1.0f), Rd(diffuse), Rs(specular), Rt(refrationcolor)
 {
 
 }
@@ -19,70 +19,126 @@ ShadingModel::~ShadingModel()
 }
 
 Vector3
-ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& scene, int bounce, PhotonMap& pMap)
+	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& scene, int bounce, PhotonMap& pMap)
 {
 	Vector3 L = Vector3(0.0f, 0.0f, 0.0f);
-    const Vector3 viewDir = -ray.d; // d is a unit vector
+	const Vector3 viewDir = -ray.d; // d is a unit vector
+	Vector3 d;
+	bool inside = false;
 
-    bounce++;
-	if(bounce > maxBounces){
-		return L;
-	}
-
-	if(outsideEta == -1.0){
+	if (outsideEta == -1.0){
 		outsideEta = ray.eta;
 	}
 
-	Vector3 d;
- 	if(Rs != Vector3(0.0f)){
-		d = -2 * dot(hit.N, ray.d) * hit.N + ray.d;
-		Ray specR(hit.P, d, outsideEta);
-		HitInfo specHitInfo;
-		if(scene.trace(specHitInfo, specR, 0.00029)){
-			Vector3 mirrorColor = specHitInfo.material->shade(specR, specHitInfo, scene, bounce, pMap);
-			L += Rs * mirrorColor;
-		}
- 	}
-
- 	//Compute direct lighting for points lights
-	const PointLights *lightlist = scene.lights();
-
-	// Loop over all of the PointLights
-	PointLights::const_iterator lightIter;
-	for (lightIter = lightlist->begin(); lightIter != lightlist->end(); lightIter++)
-	{
-		PointLight* light = *lightIter;
-
-		Vector3 l = light->position() - hit.P;
-
-		// the inverse-squared falloff
-		float falloff = l.length2(); //gives the length^2 of l which is also r^2
-
-		// normalize the light direction
-		float r = sqrt(falloff);
-		l /= r;
-
-		// get the diffuse component
-		float nDotL = dot(hit.N, l);
-
-		// Shadow computation
-		Vector3 E = std::max(0.0f, nDotL * light->wattage() / (4 * PI * falloff));
-		Ray shadowCheck(hit.P, l, 0);
-		HitInfo temp;
-		if(!scene.trace(temp, shadowCheck, 0.00029, r)){
-			L += (1/PI) * Rd * E * light->color();
-		} // else in shadow
-		
-		//Phong model
-		if(Rs != Vector3(0.0f)){
-			float exp = 50.0;
-			float dDotl = dot(d,l);
-			if(dDotl > 0){
-				L += Rs * ((pow(dDotl, exp) * E) / nDotL);
+	if ((Rs != Vector3(0.0f) || Rt != Vector3(0.0f)) && bounce < maxBounces){
+		// Refraction
+		if (Rt != Vector3(0.0f)){
+			float n1, n2;
+			//this code works as intended when the two materials are different
+			//when they are equal n1/n2 will be 1 anyways
+			if (ray.eta == outsideEta){
+				//ray outside material, going inn
+				n1 = outsideEta;
+				n2 = eta;
 			}
+			else if (ray.eta == eta){
+				//ray inside material, going out
+				n1 = eta;
+				n2 = outsideEta;
+				inside = true;
+			}
+			else{
+				//some special intersection
+				n1 = -1;
+				n2 = -1;
+				inside = true;
+			}
+
+			//cout << "n1: " <<  n1 << " n2: " <<  n2 << endl;
+			Vector3 N = hit.N;
+			if (dot(viewDir, hit.N) < 0){
+				//normal facing the wrong way
+				N = -hit.N;
+			}
+			float n1Divn2 = n1 / n2;
+			float wdotN = dot(viewDir, N);
+			float insideRoot = 1 - (n1Divn2  * n1Divn2) * (1.0 - wdotN * wdotN);
+			if (insideRoot < 0){
+				//cout << "Negative value inside root!!" << endl;
+				//cout << L << endl;
+				return L;
+			}
+			float sroot = sqrtf(insideRoot);
+			Vector3 wr = ((-n1Divn2) * (viewDir - (wdotN * N))) - (sroot * N);
+			//cout << wr << "Bounce: " << bounce << " View: " << viewDir << endl;
+
+			Ray refrR(hit.P, wr, n2);
+			HitInfo hitInfo;
+			if (scene.trace(hitInfo, refrR, 0.0001)){
+				Vector3 color = hitInfo.material->shade(refrR, hitInfo, scene, bounce + 1, pMap);
+				L += Rt * color;
+			}
+
+		}
+		// Specular reflection
+		if (Rs != Vector3(0.0f) && inside == false){
+			d = ray.d - 2 * hit.N *dot(hit.N, ray.d);
+			Ray specR(hit.P, d, outsideEta);
+			HitInfo specHitInfo;
+			if (scene.trace(specHitInfo, specR, 0.00029)){
+				Vector3 mirrorColor = specHitInfo.material->shade(specR, specHitInfo, scene, bounce + 1, pMap);
+				L += Rs * mirrorColor;
+			}
+
+
 		}
 	}
 
+
+
+
+		// No more reflection/refraction, return diffuse component!
+
+		//Compute direct lighting for points lights
+		const PointLights *lightlist = scene.lights();
+
+		// Loop over all of the PointLights
+		PointLights::const_iterator lightIter;
+		for (lightIter = lightlist->begin(); lightIter != lightlist->end(); lightIter++)
+		{
+			PointLight* light = *lightIter;
+
+			Vector3 l = light->position() - hit.P;
+
+			// the inverse-squared falloff
+			float falloff = l.length2(); //gives the length^2 of l which is also r^2
+
+			// normalize the light direction
+			float r = sqrt(falloff);
+			l /= r;
+
+			// get the diffuse component
+			float nDotL = dot(hit.N, l);
+
+			// Shadow computation
+			Vector3 E = std::max(0.0f, nDotL * light->wattage() / (4 * PI * falloff));
+			Ray shadowCheck(hit.P, l, 0);
+			HitInfo temp;
+			if (!scene.trace(temp, shadowCheck, 0.00029, r)){
+				L += (1 / PI) * Rd * E * light->color();
+			}
+			// else in shadow, and no light from this light.
+
+			//Phong model
+			if (Rs != Vector3(0.0f)){
+				float exp = 50.0;
+				float dDotl = dot(d, l);
+				if (dDotl > 0){
+					L += Rs * ((pow(dDotl, exp) * E) / nDotL);
+				}
+			}
+		}
+	
 	/*
 	//Compute direct lighting for Area lights
 	const RectangleLights *reclightlist = scene.reclights();
@@ -123,50 +179,6 @@ ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& scene, int 
 	// add the ambient component
 	 L += m_ka;
 
-	// Refraction
- 	if(Rt != Vector3(0.0f)){
-		float n1, n2;
-		//this code works as intended when the two materials are different
-		//when they are equal n1/n2 will be 1 anyways
-		if(ray.eta == outsideEta){
-			//ray outside material, going inn
-			n1 = outsideEta;
-			n2 = eta;
-		}
-		else if(ray.eta == eta){
-			//ray inside material, going out
-			n1 = eta;
-			n2 = outsideEta;
-		}
-		else{//some special intersection
-			n1 = -1;
-			n2 = -1;
-		}
-
-		//cout << "n1: " <<  n1 << " n2: " <<  n2 << endl;
-		Vector3 N = hit.N;
-		if(dot(viewDir, hit.N) < 0){ //normal facing the wrong way
-			N = -hit.N;
-		}
-		float n1Divn2 = n1 / n2;
-		float wdotN = dot(viewDir, N);
-		float insideRoot = 1 - (n1Divn2  * n1Divn2) * (1.0 - wdotN * wdotN);
-		if(insideRoot < 0){
-			//cout << "Negative value inside root!!" << endl;
-			//cout << L << endl;
-			return L;
-		}
-		float sroot = sqrtf(insideRoot);
-		Vector3 wr = ((-n1Divn2) * (viewDir - (wdotN * N))) - (sroot * N);
-		//cout << wr << "Bounce: " << bounce << " View: " << viewDir << endl;
-
-		Ray refrR(hit.P, wr, n2);
-		HitInfo hitInfo;
-		if(scene.trace(hitInfo, refrR, 0.0001)){
-				Vector3 color = hitInfo.material->shade(refrR, hitInfo, scene, bounce, pMap);
-				L += Rt * color;
-		}
-    }
 
 	// Estimate the radiance from the Photon Map
  	//Vector3 collectedR = estimateRadiance(hit, pMap);

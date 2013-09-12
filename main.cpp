@@ -111,11 +111,11 @@ void makeScene(){
 	g_camera->setFOV(45);
 
 	// create and place a point light source
-	PointLight * light = new PointLight;
-	light->setPosition(lightPos);
-	light->setColor(Vector3(1, 1, 1));
-	light->setWattage(25000);
-	g_scene->addLight(light);
+	PointLight * light2 = new PointLight;
+	light2->setPosition(lightPos);
+	light2->setColor(Vector3(1, 1, 1));
+	light2->setWattage(25000);
+	g_scene->addLight(light2);
 
 
 	ShadingModel* Light = new ShadingModel(Vector3(0.0f), -1.0, Vector3(0.8f), Vector3(0.0f), Vector3(0.0f));
@@ -198,43 +198,70 @@ void makeSimpleScene(){
 	g_image = new Image;
 	float lSourceDistance = 16;
 	Vector3 focusSphere = Vector3(2.1, 1.6, -1.4);
-	Vector3 ldir = Vector3(-1.19136, 2.91208, -2.51118) - focusSphere;
-	Vector3 lightPos = focusSphere + ldir.normalized() * lSourceDistance;
-	g_scene->setLightPos(lightPos);
+	Vector3 ldir = Vector3(0, 0, 0);
+	Vector3 lightPos1 = Vector3(10, 8, -10);
+	Vector3 lightPos2 = Vector3(-10, 8, -10);
+	Vector3 lightPos3 = Vector3(0, 8, 0);
+	g_scene->setLightPos(lightPos1);
 	g_scene->setFocusSphere(focusSphere, 8);
 	g_image->resize(400, 300);
 	//g_image->resize(700, 512);
 
 	// set up the camera
-	g_camera->setBGColor(Vector3(0.1f));
-	g_camera->setEye(Vector3(-2.6, 1.7, 0.4));
-	g_camera->setLookAt(Vector3(2.1, 1.3, -1.2));
+	g_camera->setBGColor(Vector3(0.0f));
+	g_camera->setEye(Vector3(-4, 1, -4));
+	g_camera->setLookAt(Vector3(0, 1, 0));
 	g_camera->setUp(Vector3(0, 1, 0));
 	g_camera->setFOV(45);
 
-	// create and place a point light source
-	PointLight * light = new PointLight;
-	light->setPosition(lightPos);
-	light->setColor(Vector3(1, 1, 1));
-	light->setWattage(1500);
-	g_scene->addLight(light);
+	// Create 1st light source
+	PointLight * light1 = new PointLight;
+	light1->setPosition(lightPos1);
+	light1->setColor(Vector3(1, 1, 1));
+	light1->setWattage(500);
+	g_scene->addLight(light1);
 
-	
-	ShadingModel* material = new ShadingModel(Vector3(.0f), 0, Vector3(0.4,.0, .0), Vector3(0.6f), Vector3(0.0f));
-	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 0, Vector3(0.0, 0.0, .4), Vector3(0.6f), Vector3(0.0f));
+	// Create 2nd light source
+	PointLight * light2 = new PointLight;
+	light2->setPosition(lightPos2);
+	light2->setColor(Vector3(1, 1, 1));
+	light2->setWattage(500);
+	g_scene->addLight(light2);
+
+	// Create 3rd light source
+	PointLight * light3 = new PointLight;
+	light3->setPosition(lightPos3);
+	light3->setColor(Vector3(1, 1, 1));
+	light3->setWattage(600);
+	g_scene->addLight(light3);
+
+	// Material properties (ambient, refraction index, diffuse, specular, refraction)
+	ShadingModel* material1 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.0f), Vector3(0.05), Vector3(1.00, 0.32, 0.36)); // red ball
+	ShadingModel* material2 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.0f), Vector3(0.90, 0.76, 0.46), Vector3(0.0f)); // yellow ball
+	ShadingModel* material3 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.0f), Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97)); // blue ball
+	ShadingModel* material4 = new ShadingModel(Vector3(.0f), 1, Vector3(0.65, 0.97, 0.46), Vector3(0), Vector3(0.0f));  // green rectangle
+	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 0, Vector3(0.8), Vector3(0.0f), Vector3(0.0f));
 	TriangleMesh * object = new TriangleMesh;
 
-	// Custom Object
-	object->setDefaultMaterial(material);
-	object->load("objects/bunny_smooth.obj");
+	// Link materials to names.
+	object->connectNameToMaterial("Material.001", material1);
+	object->connectNameToMaterial("Material.002", material2);
+	object->connectNameToMaterial("Material.003", material3);
+	object->connectNameToMaterial("rectangle", material4);
+	object->connectNameToMaterial("rectangle2", material4);
+
+	// Scene object file.
+	object->setDefaultMaterial(material3);
+	object->load("objects/balls_smooth.obj");
+	//object->load("objects/bunny.obj");
 	g_scene->addMesh(object);
 
 	// Floor triangle
 	TriangleMesh * floor = new TriangleMesh;
 	floor->createSingleTriangle();
-	floor->setV1(Vector3(0, 0, 10));
-	floor->setV2(Vector3(10, 0, -10));
-	floor->setV3(Vector3(-10, 0, -10));
+	floor->setV1(Vector3(0, 0, 500));
+	floor->setV2(Vector3(500, 0, -500));
+	floor->setV3(Vector3(-500, 0, 0));
 	floor->setN1(Vector3(0, 1, 0));
 	floor->setN2(Vector3(0, 1, 0));
 	floor->setN3(Vector3(0, 1, 0));

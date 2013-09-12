@@ -156,6 +156,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 	nrays = 0;
 	boxints = 0;
 	triangleints = 0;
+	float g = 2.2;
     
     int start = glutGet(GLUT_ELAPSED_TIME);
     const int samples = 4;
@@ -184,7 +185,6 @@ Scene::raytraceImage(Camera *cam, Image *img)
         	else{
 				shadeResult = cam->bgColor();
         	}
-			float g = 2.2;
 			Vector3 result = Vector3(pow(shadeResult.x, 1/ g), pow(shadeResult.y, 1/ g), pow(shadeResult.z, 1/ g));
 			img->setPixel(i, j, result);
         }

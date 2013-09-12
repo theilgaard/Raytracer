@@ -23,7 +23,8 @@ build/
 *_p.c
 *.ilk
 *.meta
-*.obj
+[Dd]ebug/*.obj
+[Rr]elease/*.obj
 *.pch
 *.pdb
 *.pgc
