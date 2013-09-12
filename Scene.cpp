@@ -157,9 +157,9 @@ Scene::raytraceImage(Camera *cam, Image *img)
 	boxints = 0;
 	triangleints = 0;
 	float g = 2.2;
+	const int samples = 4;
     
     int start = glutGet(GLUT_ELAPSED_TIME);
-    const int samples = 4;
     // loop over all pixels in the image
     for (int j = 0; j < img->height(); ++j)
     {

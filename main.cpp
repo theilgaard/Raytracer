@@ -201,7 +201,8 @@ void makeSimpleScene(){
 	Vector3 ldir = Vector3(0, 0, 0);
 	Vector3 lightPos1 = Vector3(10, 8, -10);
 	Vector3 lightPos2 = Vector3(-10, 8, -10);
-	Vector3 lightPos3 = Vector3(0, 8, 0);
+	Vector3 lightPos3 = Vector3(-10, 8, 10);
+	Vector3 lightPos4 = Vector3(10, 8, 10);
 	g_scene->setLightPos(lightPos1);
 	g_scene->setFocusSphere(focusSphere, 8);
 	g_image->resize(400, 300);
@@ -218,27 +219,34 @@ void makeSimpleScene(){
 	PointLight * light1 = new PointLight;
 	light1->setPosition(lightPos1);
 	light1->setColor(Vector3(1, 1, 1));
-	light1->setWattage(500);
+	light1->setWattage(50);
 	g_scene->addLight(light1);
 
 	// Create 2nd light source
 	PointLight * light2 = new PointLight;
 	light2->setPosition(lightPos2);
 	light2->setColor(Vector3(1, 1, 1));
-	light2->setWattage(500);
+	light2->setWattage(50);
 	g_scene->addLight(light2);
 
 	// Create 3rd light source
 	PointLight * light3 = new PointLight;
 	light3->setPosition(lightPos3);
 	light3->setColor(Vector3(1, 1, 1));
-	light3->setWattage(600);
+	light3->setWattage(50);
 	g_scene->addLight(light3);
 
+	// Create 3rd light source
+	PointLight * light4 = new PointLight;
+	light4->setPosition(lightPos3);
+	light4->setColor(Vector3(1, 1, 1));
+	light4->setWattage(50);
+	g_scene->addLight(light4);
+
 	// Material properties (ambient, refraction index, diffuse, specular, refraction)
-	ShadingModel* material1 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.0f), Vector3(0.05), Vector3(1.00, 0.32, 0.36)); // red ball
-	ShadingModel* material2 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.0f), Vector3(0.90, 0.76, 0.46), Vector3(0.0f)); // yellow ball
-	ShadingModel* material3 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.0f), Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97)); // blue ball
+	ShadingModel* material1 = new ShadingModel(Vector3(.0f), 1.1, Vector3(0.90, 0.32, 0.36), Vector3(0.90, 0.32, 0.36), Vector3(0.90, 0.32, 0.36)); // red ball
+	ShadingModel* material2 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.90, 0.76, 0.46), Vector3(0.90, 0.76, 0.46), Vector3(0.0f)); // yellow ball
+	ShadingModel* material3 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97)); // blue ball
 	ShadingModel* material4 = new ShadingModel(Vector3(.0f), 1, Vector3(0.65, 0.97, 0.46), Vector3(0), Vector3(0.0f));  // green rectangle
 	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 0, Vector3(0.8), Vector3(0.0f), Vector3(0.0f));
 	TriangleMesh * object = new TriangleMesh;
