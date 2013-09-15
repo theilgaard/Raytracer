@@ -9,7 +9,7 @@
 using namespace std;
 
 ShadingModel::ShadingModel(const Vector3 & ambient, float refrationIndex, const Vector3 & diffuse, const Vector3 & specular, const Vector3 & refrationcolor) :
-	m_ka(ambient), maxBounces(6), eta(refrationIndex), outsideEta(-1.0f), Rd(diffuse), Rs(specular), Rt(refrationcolor)
+	m_ka(ambient), maxBounces(6), eta(refrationIndex), outsideEta(1.00029f), Rd(diffuse), Rs(specular), Rt(refrationcolor)
 {
 
 }
@@ -23,14 +23,17 @@ float reflectance(const Vector3& normal, const Vector3 incident, float n1, float
 	float r0 = (n1 - n2) / (n1 + n2);
 	r0 *= r0;
 	float cosX = -1 * dot(normal, incident);
-	if (n1 > n2){
+	if (n1 > n2){ // Inside, going out
 		float n = n1 / n2;
 		float sinT2 = n * n * (1.0 - cosI * cosI);
 		if (sinT2 > 1.0) return 1.0; // Total internal reflection
 		cosX = sqrtf(1.0 - sinT2);
 	}
 	float x = 1.0 - cosX;
-	return r0 + (1.0 - r0) * x * x * x * x * x;
+	float kr = r0 + (1.0 - r0) * x * x * x * x * x;
+	if (kr > 1.0) return 1.0;
+	if (kr < 0.0) return 0.0;
+	return kr;
 }
 
 Vector3
@@ -40,62 +43,59 @@ Vector3
 	const Vector3 viewDir = -ray.d; // d is a unit vector
 	Vector3 reflDir, refrDir, N = hit.N;
 	bool inside = false;
-
-	if (outsideEta == -1.0){
-		outsideEta = ray.eta;
+	if (dot(ray.d, hit.N) > 0.0){
+		N = -1 * hit.N;
+		inside = true;
 	}
 
 	if ((Rs != Vector3(0.0f) || Rt != Vector3(0.0f)) && bounce < maxBounces){
 		float n1, n2, n;
 		// Check if we are inside. 
-		if (dot(viewDir, hit.N) > 0.0){
-			N = -1 * hit.N;
-			inside = true;
-		}
-		n1 = 1.0; // Air
+
+		n1 = 1.00029; // Air
 		n2 = eta;
-		n = inside ? n1 / n2 : n2 / n1;
-		float cosI = -1 * dot(viewDir, N);
-		double Kr = reflectance(N, viewDir, n1, n2, cosI);
+		n = !inside ? n1 / n2 : n2 / n1;
+		float cosI = -1 * dot(ray.d, N);
+		double Kr = !inside ? reflectance(N, ray.d, n1, n2, cosI) : reflectance(N, ray.d, n2, n1, cosI);
 		// === Reflection === 
-		if (Rs != Vector3(0.0f) && !inside){
-			reflDir = viewDir + 2 * cosI * N;
-			reflDir.normalize();
+		if (Rs != Vector3(0.0f)){
+			reflDir = ray.d + 2 * cosI * N;
 			// Trace the ray
-			Ray refL(hit.P, reflDir, outsideEta);
+			Ray refL(hit.P, reflDir, eta);
 			HitInfo specHitInfo;
 			if (scene.trace(specHitInfo, refL, 0.00029)){
 				Vector3 color = specHitInfo.material->shade(refL, specHitInfo, scene, bounce + 1, pMap);
-				L += Kr * color;
+				if (Rt != Vector3(0.0f)) // If refracted, use reflectance 
+					L += Kr * color * Rs; 
+				else
+					L += color * Rs;
 			}
 		}
 		// === Refraction ===
 		if (Rt != Vector3(0.0f)){
-			//cout << "n1: " <<  n1 << " n2: " <<  n2 << endl;
-			float insideRoot = (n  * n) * (1.0 - cosI * cosI);
-			if (insideRoot > 1.0){
-				printf("Error: Invalid vector!!\n");
-				return L;
+			float sinT2 = (n  * n) * (1.0 - cosI * cosI);
+			if (sinT2 > 1.0){
+				return L; // Total internal reflection
 			}
-			float cosT = sqrtf(1.0 - insideRoot);
-			refrDir = n * viewDir + (n * cosI - cosT) * N;
+			float cosT = sqrtf(1.0 - sinT2);
+			refrDir = n * ray.d + (n * cosI - cosT) * N;
 			refrDir.normalize();
 			// Trace the ray
 			Ray refrR(hit.P, refrDir, eta);
 			HitInfo hitInfo;
 			if (scene.trace(hitInfo, refrR, 0.00029)){
 				Vector3 color = hitInfo.material->shade(refrR, hitInfo, scene, bounce + 1, pMap);
-				L += (1 - Kr) * color;
-				L *= Rs;
+				if (Rs != Vector3(0.0f)) // If reflected, use reflectance 
+					L += (1.0 - Kr) * color * Rt;
+				else
+					L += color * Rt;
 			}
 		}
-	}else{
-		// No more reflection/refraction, return diffuse component!
+	}
+	 // No more reflection/refraction, return diffuse component!
 
-		//Compute direct lighting for points lights
+		// === Direct lighting for Point Lights ===
 		const PointLights *lightlist = scene.lights();
-
-		// Loop over all of the PointLights
 		PointLights::const_iterator lightIter;
 		for (lightIter = lightlist->begin(); lightIter != lightlist->end(); lightIter++)
 		{
@@ -111,63 +111,76 @@ Vector3
 			l /= r;
 
 			// get the diffuse component
-			float nDotL = dot(hit.N, l);
+			float nDotL = dot(N, l);
 
 			// Shadow computation
-			Vector3 E = std::max(0.0f, nDotL / falloff * light->wattage() / PI);
+			Vector3 E = std::max(0.0f, (nDotL * light->wattage() / (PI * falloff)));
 			Ray shadowCheck(hit.P, l, 0);
 			HitInfo temp;
-			if (!scene.trace(temp, shadowCheck, 0.00029, r)){
-				L += Rd * E * light->color();
+			if (!scene.trace(temp, shadowCheck, 0.0001, r)){
+				if (!(Rs != Vector3(0.0f) || Rt != Vector3(0.0f)) || bounce > maxBounces)
+					L += Rd * E * light->color();
+				//Phong highlight
+				if (Rs != Vector3(0.0f)){
+					float exp = 50.0;
+					reflDir = -2 * dot(hit.N, ray.d) * hit.N + ray.d;
+					float dDotl = dot(l, reflDir);
+					if (dDotl > 0.0){
+						L += Rs * ((powf(dDotl, exp) * E) / nDotL);
+					}
+				}
 			}
 			// else in shadow, and no light from this light.
+		}
+		// === Direct lighting for Area lights ===
+		const RectangleLights *reclightlist = scene.reclights();
+		RectangleLights::const_iterator reclightIter;
+		for (reclightIter = reclightlist->begin(); reclightIter != reclightlist->end(); reclightIter++)
+		{
+			RectangleLight* light = *reclightIter;
+			int hits = 0;
+			int tries = 10;
+			for (int i = 0; i < tries; i++){
+				Vector3 l = light->generateRandomPosition() - hit.P;
+				float r = l.length();
+				l /= r;
+				Ray shadowCheck(hit.P, l, 0);
+				HitInfo temp;
+				if (!scene.trace(temp, shadowCheck, 0.0001, r)){
+					hits++;
+				}
+			}
 
-			//Phong model
-			if (Rs != Vector3(0.0f)){
-				float exp = 70.0;
-				float dDotl = dot(reflDir, l);
+			Vector3 l = light->getCenter() - hit.P;
+
+			// the inverse-squared falloff
+			float falloff = l.length2(); //gives the length^2 of l which is also r^2
+
+			// normalize the light direction
+			float r = sqrt(falloff);
+			l /= r;
+
+			// get the diffuse component
+			float nDotL = dot(hit.N, l);
+			Vector3 E = std::max(0.0f, nDotL * light->wattage() / (4 * PI * falloff));
+			float visibility = (hits / float(tries));
+			if (!(Rs != Vector3(0.0f) || Rt != Vector3(0.0f)) || bounce > maxBounces)
+				L += visibility  * Rd * E * light->color();
+			// Phong highlight
+			if (Rs != Vector3(0.0f) && hits != 0){
+				float exp = 30.0;
+				float cosI = -1 * dot(l, hit.N);
+				reflDir = ray.d + 2 * cosI * hit.N;
+				float dDotl = dot(N, l);
 				if (dDotl > 0){
-					L += Rs * ((pow(dDotl, exp) * E) / nDotL);
+					L += Rs * ((powf(dDotl, exp) * E) / nDotL);
 				}
 			}
 		}
-	}
-	/*
-	//Compute direct lighting for Area lights
-	const RectangleLights *reclightlist = scene.reclights();
-	RectangleLights::const_iterator reclightIter;
-	for (reclightIter = reclightlist->begin(); reclightIter != reclightlist->end(); reclightIter++)
-	{
-		RectangleLight* light = *reclightIter;
-		int hits = 0;
-		int tries = 10;
-		for(int i = 0; i < tries; i++){
-			Vector3 l = light->generateRandomPosition() - hit.P;
-			float r = l.length();
-			l /= r;
-			Ray shadowCheck(hit.P, l, 0);
-			HitInfo temp;
-			if(!scene.trace(temp, shadowCheck, 0.0001, r)){
-				hits++;
-			}
-		}
+	
+	
 
-		Vector3 l = light->getCenter() - hit.P;
-
-		// the inverse-squared falloff
-		float falloff = l.length2(); //gives the length^2 of l which is also r^2
-
-		// normalize the light direction
-		float r = sqrt(falloff);
-		l /= r;
-
-		// get the diffuse component
-		float nDotL = dot(hit.N, l);
-		Vector3 E = std::max(0.0f, nDotL * light->wattage() / (4 * PI * falloff));
-		float visibility = (hits / float(tries) );
-		L +=  visibility * (1/PI) * Rd * E * light->color();
-	}
-	 */
+	
 
 	// add the ambient component
 	 L += m_ka;
@@ -209,7 +222,7 @@ Vector3
 
     return L;
 }
-
+/*
 Vector3 ShadingModel::estimateRadiance(const HitInfo& hit, PhotonMap& pMap){
 	float *pos = new float[3];
 	pos[0] = hit.P.x;
@@ -326,7 +339,7 @@ void ShadingModel::interact(const Ray& photon, const HitInfo& hit, const Scene& 
 		const float phi = 2 * PI* (rand() / (float)RAND_MAX);
 		const float theta = asin(sqrt((rand() / (float)RAND_MAX)));
 		dr = (cos(phi) * sin(theta) * u +  sin(phi) * sin(theta) * v + cos(theta) * hit.N).normalized();
-		 */
+		 
 
 		 Ray pathP(hit.P, dr, outsideEta);
 		HitInfo pathHitInfo;
@@ -398,8 +411,8 @@ void ShadingModel::interact(const Ray& photon, const HitInfo& hit, const Scene& 
 		//absorption
 		//do nothing with the photon
 	}
+	*/
 
-}
 
 
 

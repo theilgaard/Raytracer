@@ -8,6 +8,12 @@ Vector3 RectangleLight::generateRandomPosition(){
 	 return p;
 }
 
-void RectangleLight::setDimensions(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
+void RectangleLight::setDimensions(float xmi, float xma, float ymi, float yma, float zmi, float zma)
 {
+	xmin = xmi;
+	xmax = xma;
+	ymin = ymi;
+	ymax = yma;
+	zmin = zmi;
+	zmax = zma;
 }

@@ -45,7 +45,7 @@ void PointLight::emitPhotons(const int nPhotons, const Scene& scene, PhotonMap& 
 		HitInfo hitInfo;
 		if(scene.trace(hitInfo, photon, 0.001)){
 			Vector3 power = Vector3( m_color.x * photonPower, m_color.y * photonPower, m_color.z * photonPower);
-			hitInfo.material->interact(photon, hitInfo, scene, 0, power, pMap);
+			//hitInfo.material->interact(photon, hitInfo, scene, 0, power, pMap);
 		}
 	}
 

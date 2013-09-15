@@ -16,7 +16,7 @@ void AreaLight::emitPhotons(const int nPhotons, const Scene& scene, PhotonMap& p
 		if(scene.trace(hitInfo, photon, 0.001)){
 			//float photonPower = m_wattage / nPhotons;
 			Vector3 power = Vector3( m_color.x * m_wattage, m_color.y * m_wattage, m_color.z * m_wattage);
-			hitInfo.material->interact(photon, hitInfo, scene, 0, power, pMap);
+		//	hitInfo.material->interact(photon, hitInfo, scene, 0, power, pMap);
 		}
 	}
 

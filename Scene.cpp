@@ -62,12 +62,20 @@ Scene::openGL(Camera *cam)
     	glColor3f(1.0,1.0,1.0);
         m_objects[i]->renderGL();
     }
+	// draw lights
+	for (size_t i = 0; i < m_lights.size(); ++i) {
+		glPushMatrix();
+			glTranslatef(m_lights[i]->position().x, m_lights[i]->position().y, m_lights[i]->position().z);
+			glColor3f(1.0, 1.0, 0.0);
+			glutSolidSphere(0.2, 10, 10);
+		glPopMatrix();
+		glBegin(GL_LINES);
+			glColor3f(1.0, 0.0, 0.0);
+			glVertex3f(m_lights[i]->position().x, m_lights[i]->position().y, m_lights[i]->position().z);
+			glVertex3f(lFocusPos.x, lFocusPos.y, lFocusPos.z);
+		glEnd();
 
-    glBegin(GL_LINES);
-    	glColor3f(1.0,0.0,0.0);
-		glVertex3f(lightPos.x, lightPos.y, lightPos.z);
-		glVertex3f(lFocusPos.x, lFocusPos.y, lFocusPos.z);
-    glEnd();
+	}
 
   //  cout << "Eye: " << cam->eye() << endl;
 
