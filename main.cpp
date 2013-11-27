@@ -216,27 +216,27 @@ void makeSimpleScene(){
 	g_camera->setFOV(45);
 
 	// Create 1st light source
-	RectangleLight * light1 = new RectangleLight();
-	light1->setDimensions(40, 40, 40, 0, 0, 0);
-	light1->setAxisFixed(true, false, true);
-	//PointLight * light1 = new PointLight;
+	//RectangleLight * light1 = new RectangleLight();
+	//light1->setDimensions(40, 40, 40, 0, 0, 0);
+	//light1->setAxisFixed(true, false, true);
+	PointLight * light1 = new PointLight;
 	light1->setPosition(lightPos1);
 	light1->setColor(Vector3(1, 1, 1));
 	light1->setWattage(150);
-	g_scene->addRecLight(light1);
-	//g_scene->addLight(light1);
+	//g_scene->addRecLight(light1);
+	g_scene->addLight(light1);
 
 	// Create 2nd light source
-	RectangleLight * light2 = new RectangleLight();
-	light2->setDimensions(40, 40, 40, 0, 0, 0);
-	light2->setAxisFixed(true, false, true);
-	//PointLight * light2 = new PointLight;
+	//RectangleLight * light2 = new RectangleLight();
+	//light2->setDimensions(40, 40, 40, 0, 0, 0);
+	//light2->setAxisFixed(true, false, true);
+	PointLight * light2 = new PointLight;
 	light2->setPosition(lightPos2);
 	light2->setColor(Vector3(1, 1, 1));
 	light2->setWattage(150);
-	g_scene->addRecLight(light2);
-	//g_scene->addLight(light2);
-
+	//g_scene->addRecLight(light2);
+	g_scene->addLight(light2);
+	/*
 	// Create 3rd light source
 	RectangleLight * light3 = new RectangleLight();
 	light3->setDimensions(40, 40, 40, 0, 0, 0);
@@ -257,9 +257,9 @@ void makeSimpleScene(){
 	light4->setWattage(150);
 	g_scene->addRecLight(light4);
 	//g_scene->addLight(light4);
-
+	*/
 	// Material properties (ambient, refraction index, diffuse, specular, refraction)
-	ShadingModel* material1 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.90), Vector3(0.90), Vector3(0.90)); // red ball
+	ShadingModel* material1 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.90, 0.46, 0.36), Vector3(0.90, 0.46, 0.36), Vector3(0.90, 0.46, 0.36)); // red ball
 	ShadingModel* material2 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.90, 0.76, 0.46), Vector3(0.90, 0.76, 0.46), Vector3(0.0f)); // yellow ball
 	ShadingModel* material3 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97)); // blue ball
 	ShadingModel* material4 = new ShadingModel(Vector3(.0f), 1, Vector3(0.65, 0.97, 0.46), Vector3(0), Vector3(0.0f));  // green rectangle

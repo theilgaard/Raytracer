@@ -203,6 +203,7 @@ void TriangleMesh::loadObj(FILE* fp, const Matrix4x4& ctm)
 
     if (nt > 0) // Got texture coords data
 	{
+		printf("Got texture coords data\n");
         m_texCoords = new VectorR2[nt];
         m_texCoordIndices = new TupleI3[nf];
 		m_hasTextureCoords = true;

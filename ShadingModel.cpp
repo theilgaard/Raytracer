@@ -85,10 +85,24 @@ Vector3
 			HitInfo hitInfo;
 			if (scene.trace(hitInfo, refrR, 0.00029)){
 				Vector3 color = hitInfo.material->shade(refrR, hitInfo, scene, bounce + 1, pMap);
-				if (Rs != Vector3(0.0f)) // If reflected, use reflectance 
-					L += (1.0 - Kr) * color * Rt;
-				else
-					L += color * Rt;
+				float dist = (hit.P - ray.o).length();
+				Vector3 absorbance = color * 0.2 * -dist;
+				Vector3 transparency = Vector3(expf(absorbance.x),
+					expf(absorbance.y),
+					expf(absorbance.z));
+				if (!inside){ // Beer's Law.
+					if (Rs != Vector3(0.0f)) // If reflected, use reflectance 
+						L += (1.0 - Kr) * color * Rt * transparency;
+					else
+						L += color * Rt * transparency;
+				}
+				else{
+					if (Rs != Vector3(0.0f)) // If reflected, use reflectance 
+						L += (1.0 - Kr) * color * Rt;
+					else
+						L += color * Rt;
+				}
+
 			}
 		}
 	}
