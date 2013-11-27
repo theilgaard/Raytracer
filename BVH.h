@@ -10,13 +10,14 @@
 class BVH
 {
 public:
+	BVH() { nBoxes = 0; nLeafs = 0; }
     void build(Objects * objs);
     bool intersect(HitInfo& result, const Ray& ray,
                    float tMin = 0.0f, float tMax = MIRO_TMAX) const;
 	void draw();
     
-    int totalnBoxes;
-	int nLeafNodes;
+    int nBoxes;
+	int nLeafs;
 protected:
 	BBox *root;
 	Objects *m_objects;

@@ -99,7 +99,6 @@ void makeScene(){
 	Vector3 ldir = Vector3(-1.19136, 2.91208, -2.51118) - focusSphere;
 	Vector3 lightPos = focusSphere + ldir.normalized() * lSourceDistance;
 	g_scene->setLightPos(lightPos);
-	g_scene->setFocusSphere(focusSphere, 5);
 	g_image->resize(400, 300);
 	//g_image->resize(700, 512);
 
@@ -204,9 +203,7 @@ void makeSimpleScene(){
 	Vector3 lightPos3 = Vector3(-10, 8, 10);
 	Vector3 lightPos4 = Vector3(10, 8, 10);
 	g_scene->setLightPos(lightPos1);
-	g_scene->setFocusSphere(focusSphere, 8);
 	g_image->resize(400, 300);
-	//g_image->resize(700, 512);
 
 	// set up the camera
 	g_camera->setBGColor(Vector3(0.0f));
@@ -216,48 +213,19 @@ void makeSimpleScene(){
 	g_camera->setFOV(45);
 
 	// Create 1st light source
-	//RectangleLight * light1 = new RectangleLight();
-	//light1->setDimensions(40, 40, 40, 0, 0, 0);
-	//light1->setAxisFixed(true, false, true);
 	PointLight * light1 = new PointLight;
 	light1->setPosition(lightPos1);
 	light1->setColor(Vector3(1, 1, 1));
 	light1->setWattage(150);
-	//g_scene->addRecLight(light1);
 	g_scene->addLight(light1);
 
 	// Create 2nd light source
-	//RectangleLight * light2 = new RectangleLight();
-	//light2->setDimensions(40, 40, 40, 0, 0, 0);
-	//light2->setAxisFixed(true, false, true);
 	PointLight * light2 = new PointLight;
 	light2->setPosition(lightPos2);
 	light2->setColor(Vector3(1, 1, 1));
 	light2->setWattage(150);
-	//g_scene->addRecLight(light2);
 	g_scene->addLight(light2);
-	/*
-	// Create 3rd light source
-	RectangleLight * light3 = new RectangleLight();
-	light3->setDimensions(40, 40, 40, 0, 0, 0);
-	light3->setAxisFixed(true, false, true);
-	//PointLight * light3 = new PointLight;
-	light3->setPosition(lightPos3);
-	light3->setColor(Vector3(1, 1, 1));
-	light3->setWattage(150);
-	g_scene->addRecLight(light3);
-	//g_scene->addLight(light3);
-	// Create 4th light source
-	RectangleLight * light4 = new RectangleLight();
-	light4->setDimensions(40, 40, 40, 0, 0, 0);
-	light4->setAxisFixed(true, false, true);
-	//PointLight * light4 = new PointLight;
-	light4->setPosition(lightPos4);
-	light4->setColor(Vector3(1, 1, 1));
-	light4->setWattage(150);
-	g_scene->addRecLight(light4);
-	//g_scene->addLight(light4);
-	*/
+
 	// Material properties (ambient, refraction index, diffuse, specular, refraction)
 	ShadingModel* material1 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.90, 0.46, 0.36), Vector3(0.90, 0.46, 0.36), Vector3(0.90, 0.46, 0.36)); // red ball
 	ShadingModel* material2 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.90, 0.76, 0.46), Vector3(0.90, 0.76, 0.46), Vector3(0.0f)); // yellow ball

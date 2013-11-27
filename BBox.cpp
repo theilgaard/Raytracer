@@ -51,8 +51,8 @@ void BBox::calcDimensions(Objects * objs){
 
 float BBox::surfaceArea(){
 	return 2 * ((bounds[1].x - bounds[0].x)*(bounds[1].y - bounds[0].y)
-		+ (bounds[1].y - bounds[0].y)*(bounds[1].z - bounds[0].z)
-		+ (bounds[1].x - bounds[0].x)*(bounds[1].z - bounds[0].z));
+			 + (bounds[1].y - bounds[0].y)*(bounds[1].z - bounds[0].z)
+			 + (bounds[1].x - bounds[0].x)*(bounds[1].z - bounds[0].z));
 }
 
 float BBox::getbboxCost() {

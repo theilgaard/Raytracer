@@ -4,7 +4,6 @@
 #include <vector>
 #include "Vector3.h"
 #include "Ray.h"
-#include "PhotonMap.h"
 
 class Scene;
 
@@ -22,7 +21,6 @@ public:
 
     void preCalc() {} // use this if you need to
 
-    void emitPhotons(int nPhotons, const Scene& scene, PhotonMap& pMap);
     const Vector3& getCenter() const     {return center;}
     virtual Vector3 generateRandomPosition();
 

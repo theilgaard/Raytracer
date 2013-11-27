@@ -87,8 +87,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MiroWindow.cpp" />
-    <ClCompile Include="photonmap.cpp" />
-    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="RectangleLight.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShadingModel.cpp" />
@@ -111,7 +109,6 @@
     <ClInclude Include="MiroWindow.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="OpenGL.h" />
-    <ClInclude Include="photonMap.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RectangleLight.h" />

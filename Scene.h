@@ -4,7 +4,6 @@
 #include "Miro.h"
 #include "Object.h"
 #include "BVH.h"
-#include "photonMap.h"
 #include "PointLight.h"
 #include "RectangleLight.h"
 
@@ -28,7 +27,7 @@ public:
 
     void preCalc();
     void openGL(Camera *cam);
-    void setFocusSphere(Vector3 lightFocusPos, float radius){ lFocusPos = lightFocusPos; focusSphereR = radius; }
+
     void raytraceImage(Camera *cam, Image *img);
     bool trace(HitInfo& minHit, const Ray& ray,
                float tMin = 0.0f, float tMax = MIRO_TMAX) const;
@@ -42,8 +41,6 @@ protected:
     RectangleLights recLights;
     PhotonMap* pMap;
     bool preCalcDone;
-    Vector3 lFocusPos;
-    float focusSphereR;
     Vector3 lightPos;
 };
 

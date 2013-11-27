@@ -4,7 +4,6 @@
 #include <vector>
 #include "Vector3.h"
 #include "Ray.h"
-#include "PhotonMap.h"
 
 class Scene;
 
@@ -20,8 +19,6 @@ public:
     const Vector3& position() const     {return m_position;}
 
     void preCalc() {} // use this if you need to
-
-    void emitPhotons(const int nPhotons, const Scene& scene, PhotonMap& pMap, Vector3 lFocusPos, float focusSphereR);
 
 protected:
     Vector3 m_position;

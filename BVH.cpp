@@ -15,10 +15,11 @@ struct objectCmp {
 
 void BVH::divide(BBox* bbox, int depth)
 {
+	nBoxes++;
 	if (bbox->lastElement - bbox->firstElement <= 3) {
 		bbox->isLeaf = true;
-	}
-	else {
+		nLeafs++;
+	} else {
 		bbox->isLeaf = false;
 		int axis = depth % 3;
 		cmp.axis = axis;

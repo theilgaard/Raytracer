@@ -69,28 +69,10 @@ Scene::openGL(Camera *cam)
 			glColor3f(1.0, 1.0, 0.0);
 			glutSolidSphere(0.2, 10, 10);
 		glPopMatrix();
-		glBegin(GL_LINES);
-			glColor3f(1.0, 0.0, 0.0);
-			glVertex3f(m_lights[i]->position().x, m_lights[i]->position().y, m_lights[i]->position().z);
-			glVertex3f(lFocusPos.x, lFocusPos.y, lFocusPos.z);
-		glEnd();
-
 	}
-
-  //  cout << "Eye: " << cam->eye() << endl;
 
     if(preCalcDone){
 		//m_bvh.draw();
-		for (int i = 0; i < pMap->getStoredPhotonsNumber(); i++){
-			Photon p = pMap->getPhoton(i);
-			glBegin(GL_POINTS);
-				glPointSize(5.0);
-				glColor3f(0.0, 1.0, 0.0);
-				glVertex3f(p.pos[0], p.pos[1], p.pos[2]);
-			glEnd();
-			//printf("x: %f y: %f z %f\n",hit.P.x, hit.P.y, hit.P.z);
-		}
-		fflush(stdout);
     }
     else{
     	cout << "Remember to do preCalc()!!!" << endl;
@@ -115,42 +97,10 @@ Scene::preCalc()
     m_bvh.build(&m_objects);
     int end = glutGet(GLUT_ELAPSED_TIME);
     printf("Time used to build BVH: %i min and %i sec\n", (end - start) / 60000, (end - start) / 1000 % 60);
-    printf("Total number of boxes: %i\n", m_bvh.totalnBoxes);
-	printf("Number of leaf nodes: %i\n", m_bvh.nLeafNodes);
+	printf("Total number of boxes: %i\n", m_bvh.nBoxes);
+	printf("Number of leaf nodes: %i\n", m_bvh.nLeafs);
     printf("\n");
     fflush(stdout);
-
-    start = glutGet(GLUT_ELAPSED_TIME);
-
-
-    pMap = new PhotonMap(nPhotons + maxPhotonBounces);
-
-    PointLights::iterator lit;
-	int photons = nPhotons / float(m_lights.size());
-	printf("photons: %i \n", photons);
-	for (lit = m_lights.begin(); lit != m_lights.end(); lit++)
-	{
-		(*lit)->emitPhotons(photons, *this, *pMap, lFocusPos, focusSphereR);
-	}
-	fflush(stdout);
-
-//	RectangleLights::iterator reclit;
-//	int photons = nPhotons / float(recLights.size());
-//	printf("photons: %i \n", photons);
-//	for (reclit = recLights.begin(); reclit != recLights.end(); reclit++)
-//	{
-//		(*reclit)->emitPhotons(photons, *this, *pMap);
-//	}
-
-	//pMap->scale_photon_power(1.0 / (float) nPhotons);
-	pMap->balance();
-	printf("Stored: %i \n", pMap->getStoredPhotonsNumber());
-
-	end = glutGet(GLUT_ELAPSED_TIME);
-	int time = end - start;
-	printf("Time used during first pass: %i min and %i sec\r", time/60000, (time/1000) % 60);
-	printf("\n");
-	fflush(stdout);
 
 	preCalcDone = true;
 }
