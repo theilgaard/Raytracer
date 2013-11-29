@@ -191,7 +191,7 @@ void makeScene(){
 	g_scene->preCalc();
 }
 
-void makeSimpleScene(){
+void makeRefractedBallsScene(){
 	g_camera = new Camera;
 	g_scene = new Scene;
 	g_image = new Image;
@@ -200,13 +200,11 @@ void makeSimpleScene(){
 	Vector3 ldir = Vector3(0, 0, 0);
 	Vector3 lightPos1 = Vector3(10, 8, -10);
 	Vector3 lightPos2 = Vector3(-10, 8, -10);
-	Vector3 lightPos3 = Vector3(-10, 8, 10);
-	Vector3 lightPos4 = Vector3(10, 8, 10);
 	g_scene->setLightPos(lightPos1);
 	g_image->resize(400, 300);
 
 	// set up the camera
-	g_camera->setBGColor(Vector3(0.0f));
+	g_camera->setBGColor(Vector3(0.1f));
 	g_camera->setEye(Vector3(-4, 4, -4));
 	g_camera->setLookAt(Vector3(0, 2, 0));
 	g_camera->setUp(Vector3(0, 1, 0));
@@ -227,11 +225,12 @@ void makeSimpleScene(){
 	g_scene->addLight(light2);
 
 	// Material properties (ambient, refraction index, diffuse, specular, refraction)
-	ShadingModel* material1 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.90, 0.46, 0.36), Vector3(0.90, 0.46, 0.36), Vector3(0.90, 0.46, 0.36)); // red ball
-	ShadingModel* material2 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.90, 0.76, 0.46), Vector3(0.90, 0.76, 0.46), Vector3(0.0f)); // yellow ball
-	ShadingModel* material3 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97)); // blue ball
+	ShadingModel* material1 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.01), Vector3(0.90, 0.46, 0.36), Vector3(0.90, 0.46, 0.36)); // red ball
+	ShadingModel* material2 = new ShadingModel(Vector3(.0f), 1.005, Vector3(0.01), Vector3(0.90, 0.76, 0.46), Vector3(0.0f)); // yellow ball
+	ShadingModel* material3 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.05), Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97)); // blue ball
 	ShadingModel* material4 = new ShadingModel(Vector3(.0f), 1, Vector3(0.65, 0.97, 0.46), Vector3(0), Vector3(0.0f));  // green rectangle
-	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 0, Vector3(0.8), Vector3(0.0f), Vector3(0.0f));
+	ShadingModel* glass = new ShadingModel(Vector3(.0f), 1.52, Vector3(0.01), Vector3(0.6), Vector3(.95)); // clear glass
+	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 1, Vector3(0.8), Vector3(0.2f), Vector3(0.0f));
 	TriangleMesh * object = new TriangleMesh;
 
 	// Link materials to names.
@@ -242,9 +241,9 @@ void makeSimpleScene(){
 	object->connectNameToMaterial("rectangle2", material4);
 
 	// Scene object file.
-	object->setDefaultMaterial(material2);
+	object->setDefaultMaterial(glass);
 	object->load("objects/balls_smooth.obj");
-	//object->load("objects/teapot_smooth.obj");
+	//object->load("objects/sphere_super_smooth.obj");
 	g_scene->addMesh(object);
 
 	// Floor triangle
@@ -271,7 +270,7 @@ main(int argc, char*argv[])
 {
     // create a scene
 	//makeScene();
-	makeSimpleScene();
+	makeRefractedBallsScene();
 
     MiroWindow miro(&argc, argv);
     miro.mainLoop();

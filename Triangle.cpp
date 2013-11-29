@@ -69,7 +69,7 @@ Triangle::intersect(HitInfo& result, const Ray& r, float tMin, float tMax)
 	float beta = V_b*invSignSum;
 	float gamma = V_c*invSignSum;
 
-	result.P = alpha*v0 + beta*v1 + gamma*v2;
+	result.P = alpha*v0 + beta*v1 + gamma*v2; // Hitpoint on triangle.
 	float t = dot((result.P - r.o), r.d);
 	if (t < tMin || t > tMax)
 		return false;

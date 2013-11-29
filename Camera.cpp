@@ -22,7 +22,7 @@ Camera::Camera() :
     m_viewDir(0,0,-1),
     m_up(0,1,0),
     m_lookAt(FLT_MAX, FLT_MAX, FLT_MAX),
-    m_fov((45.)*(PI/180.))
+    m_fov((85.)*(PI/180.))
 {
     calcLookAt();
 }

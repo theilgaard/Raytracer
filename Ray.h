@@ -10,7 +10,8 @@ public:
 	Vector3 o,      //!< Origin of ray
 			d,      //!< Direction of ray
 			inv;	//!< Inverse direction of ray
-    float eta;
+    float eta;		// Current refraction
+	float time;		
 	int sign[3];
 	float	dxoy, dxoz,
 			dyoz, dyox,

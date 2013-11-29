@@ -9,7 +9,7 @@
 using namespace std;
 
 ShadingModel::ShadingModel(const Vector3 & ambient, float refrationIndex, const Vector3 & diffuse, const Vector3 & specular, const Vector3 & refrationcolor) :
-	m_ka(ambient), maxBounces(6), eta(refrationIndex), outsideEta(1.00029f), Rd(diffuse), Rs(specular), Rt(refrationcolor)
+	m_ka(ambient), maxBounces(3), eta(refrationIndex), outsideEta(1.00029f), Rd(diffuse), Rs(specular), Rt(refrationcolor)
 {
 
 }
@@ -47,6 +47,7 @@ Vector3	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& sce
 		inside = true;
 	}
 
+	// Reflection and refraction
 	if ((Rs != Vector3(0.0f) || Rt != Vector3(0.0f)) && bounce < maxBounces){
 		float n1, n2, n;
 		// Check if we are inside. 
@@ -87,8 +88,8 @@ Vector3	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& sce
 				float dist = (hit.P - ray.o).length();
 				Vector3 absorbance = color * 0.2 * -dist;
 				Vector3 transparency = Vector3(expf(absorbance.x),
-					expf(absorbance.y),
-					expf(absorbance.z));
+											   expf(absorbance.y),
+											   expf(absorbance.z));
 				if (!inside){ // Beer's Law.
 					if (Rs != Vector3(0.0f)) // If reflected, use reflectance 
 						L += (1.0 - Kr) * color * Rt * transparency;
@@ -105,7 +106,7 @@ Vector3	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& sce
 			}
 		}
 	}
-	 // No more reflection/refraction, return diffuse component!
+	 // No more reflection/refraction, add the diffuse component!
 
 		// === Direct lighting for Point Lights ===
 		const PointLights *lightlist = scene.lights();
@@ -131,7 +132,7 @@ Vector3	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& sce
 			Ray shadowCheck(hit.P, l, 0);
 			HitInfo temp;
 			if (!scene.trace(temp, shadowCheck, 0.0001, r)){
-				if (!(Rs != Vector3(0.0f) || Rt != Vector3(0.0f)) || bounce > maxBounces)
+				//if (!(Rs != Vector3(0.0f) || Rt != Vector3(0.0f)) || bounce > maxBounces)
 					L += Rd * E * light->color();
 				//Phong highlight
 				if (Rs != Vector3(0.0f)){

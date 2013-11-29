@@ -51,10 +51,6 @@ Scene::openGL(Camera *cam)
     	glTranslatef(lightPos.x, lightPos.y, lightPos.z);
 		glutSolidSphere(0.2, 10, 10);
 	glPopMatrix();
-	glPushMatrix();
-		glTranslatef(lFocusPos.x, lFocusPos.y, lFocusPos.z);
-		glutSolidSphere(focusSphereR, 10, 10);
-	glPopMatrix();
 	*/
 
     // draw objects
@@ -125,7 +121,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
         {
 			Vector3 pixelSum;
 			bool hit = false;
-        	for(int s = 0; s < samples; s++){
+        	for(int s = 0; s < samples; s++){						// Stochastic sampling
 				float dx = 0.5 * (rand() / (float)RAND_MAX) - 1.0;
 				float dy = 0.5 * (rand() / (float)RAND_MAX) - 1.0;
 				ray = cam->eyeRay(i + dx, j + dy, img->width(), img->height(), 1.00029);
@@ -157,7 +153,6 @@ Scene::raytraceImage(Camera *cam, Image *img)
     int end = glutGet(GLUT_ELAPSED_TIME);
 
     printf("Rendering Progress: 100.000%\n");
-    debug("done Raytracing!\n");
 
     printf("\n");
     //printf("Time used to raytrace: %i sec\n", (end - start)/1000 );
