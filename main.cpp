@@ -92,7 +92,7 @@ rotate(float angle, float x, float y, float z)
 
 void makeScene(){
 	g_camera = new Camera;
-	g_scene = new Scene;
+	g_scene = &Scene::getInstance();
 	g_image = new Image;
 	float lSourceDistance = 140;
 	Vector3 focusSphere = Vector3(2.1, 1.6, -1.4);
@@ -193,7 +193,7 @@ void makeScene(){
 
 void makeRefractedBallsScene(){
 	g_camera = new Camera;
-	g_scene = new Scene;
+	g_scene = &Scene::getInstance();
 	g_image = new Image;
 	float lSourceDistance = 16;
 	Vector3 focusSphere = Vector3(2.1, 1.6, -1.4);
@@ -230,6 +230,7 @@ void makeRefractedBallsScene(){
 	ShadingModel* material3 = new ShadingModel(Vector3(.0f), 1.5, Vector3(0.05), Vector3(0.65, 0.77, 0.97), Vector3(0.65, 0.77, 0.97)); // blue ball
 	ShadingModel* material4 = new ShadingModel(Vector3(.0f), 1, Vector3(0.65, 0.97, 0.46), Vector3(0), Vector3(0.0f));  // green rectangle
 	ShadingModel* glass = new ShadingModel(Vector3(.0f), 1.52, Vector3(0.01), Vector3(0.6), Vector3(.95)); // clear glass
+	ShadingModel* lightblue = new ShadingModel(Vector3(0.0), 1, Vector3(84.0/255.0, 170.0/255, 1.0), Vector3(0.0), Vector3(0.0)); // Light blue lambertian.
 	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 1, Vector3(0.8), Vector3(0.2f), Vector3(0.0f));
 	TriangleMesh * object = new TriangleMesh;
 
@@ -241,7 +242,7 @@ void makeRefractedBallsScene(){
 	object->connectNameToMaterial("rectangle2", material4);
 
 	// Scene object file.
-	object->setDefaultMaterial(glass);
+	object->setDefaultMaterial(lightblue);
 	object->load("objects/balls_smooth.obj");
 	//object->load("objects/sphere_super_smooth.obj");
 	g_scene->addMesh(object);
@@ -265,12 +266,80 @@ void makeRefractedBallsScene(){
 	g_scene->preCalc();
 }
 
+void makeAnimatedSphere(){
+	g_camera = new Camera;
+	g_scene = &Scene::getInstance();
+	g_image = new Image;
+	float lSourceDistance = 16;
+	Vector3 focusSphere = Vector3(2.1, 1.6, -1.4);
+	Vector3 ldir = Vector3(0, 0, 0);
+	Vector3 lightPos1 = Vector3(10, 8, -10);
+	Vector3 lightPos2 = Vector3(-10, 8, -10);
+	g_scene->setLightPos(lightPos1);
+	g_image->resize(400, 300);
+
+	// set up the camera
+	g_camera->setBGColor(Vector3(0.1f));
+	g_camera->setEye(Vector3(-12, 8, 0));
+	g_camera->setLookAt(Vector3(0, 2, 0));
+	g_camera->setUp(Vector3(0, 1, 0));
+	g_camera->setFOV(45);
+
+	// Create 1st light source
+	PointLight * light1 = new PointLight;
+	light1->setPosition(lightPos1);
+	light1->setColor(Vector3(1, 1, 1));
+	light1->setWattage(150);
+	g_scene->addLight(light1);
+
+	// Create 2nd light source
+	PointLight * light2 = new PointLight;
+	light2->setPosition(lightPos2);
+	light2->setColor(Vector3(1, 1, 1));
+	light2->setWattage(150);
+	g_scene->addLight(light2);
+
+	ShadingModel* lightblue = new ShadingModel(Vector3(0.0), 1, Vector3(30.0/255.0, 144.0/255, 1.0), Vector3(0.0), Vector3(0.0)); // Light blue lambertian.
+	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 1, Vector3(0.8), Vector3(0.2f), Vector3(0.0f));
+	
+
+	TriangleMesh * object = new TriangleMesh;
+	object->setDefaultMaterial(lightblue);
+	object->load("objects/sphere_super_smooth.obj");
+	g_scene->addMesh(object);
+
+	TriangleMesh * object2 = new TriangleMesh;
+	object2->setDefaultMaterial(lightblue);
+	object2->load("objects/sphere_super_smooth2.obj");
+	g_scene->addMesh(object2);
+
+
+	// Floor triangle
+	TriangleMesh * floor = new TriangleMesh;
+	floor->createSingleTriangle();
+	floor->setV1(Vector3(0, 0, 500));
+	floor->setV2(Vector3(500, 0, -500));
+	floor->setV3(Vector3(-500, 0, 0));
+	floor->setN1(Vector3(0, 1, 0));
+	floor->setN2(Vector3(0, 1, 0));
+	floor->setN3(Vector3(0, 1, 0));
+	Triangle* t = new Triangle;
+
+	t->setIndex(0);
+	t->setMesh(floor);
+	t->setMaterial(floorMat);
+	g_scene->addObject(t);
+
+	g_scene->preCalc();
+}
+
 int
 main(int argc, char*argv[])
 {
     // create a scene
 	//makeScene();
-	makeRefractedBallsScene();
+	//makeRefractedBallsScene();
+	makeAnimatedSphere();
 
     MiroWindow miro(&argc, argv);
     miro.mainLoop();

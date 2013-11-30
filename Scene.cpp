@@ -22,11 +22,6 @@ int triangleints = 0;
 int nPhotons = 1000;
 const int maxPhotonBounces = 3;
 
-Scene::Scene()
-{
-	preCalcDone = false;
-}
-
 void Scene::addMesh(TriangleMesh* mesh)
 {
 	for (int i = 0; i < mesh->numTris(); ++i)
@@ -46,14 +41,7 @@ Scene::openGL(Camera *cam)
 
     cam->drawGL();
 
-	/*
-    glPushMatrix();
-    	glTranslatef(lightPos.x, lightPos.y, lightPos.z);
-		glutSolidSphere(0.2, 10, 10);
-	glPopMatrix();
-	*/
-
-    // draw objects
+	// draw objects
     for (size_t i = 0; i < m_objects.size(); ++i){
     	glColor3f(1.0,1.0,1.0);
         m_objects[i]->renderGL();
@@ -111,7 +99,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 	boxints = 0;
 	triangleints = 0;
 	float g = 2.2;
-	const int samples = 4;
+	const int samples = 1;
     
     int start = glutGet(GLUT_ELAPSED_TIME);
     // loop over all pixels in the image

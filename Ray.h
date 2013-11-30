@@ -44,6 +44,20 @@ public:
 		dzox = d.z*o.x;
 		dzoy = d.z*o.y;
     }
+ 
+	Ray(const Vector3& o, const Vector3& d, float eta, float time) : o(o), d(d), eta(eta), time(time)
+    {
+		inv = Vector3(1.0f) / d;
+		sign[0] = (inv.x < 0);
+		sign[1] = (inv.y < 0);
+		sign[2] = (inv.z < 0);
+		dxoy = d.x*o.y;
+		dxoz = d.x*o.z;
+		dyoz = d.y*o.z;
+		dyox = d.y*o.x;
+		dzox = d.z*o.x;
+		dzoy = d.z*o.y;
+    }
 };
 
 
