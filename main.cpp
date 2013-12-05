@@ -302,7 +302,6 @@ void makeAnimatedSphere(){
 	ShadingModel* lightblue = new ShadingModel(Vector3(0.0), 1, Vector3(30.0/255.0, 144.0/255, 1.0), Vector3(0.0), Vector3(0.0)); // Light blue lambertian.
 	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 1, Vector3(0.8), Vector3(0.2f), Vector3(0.0f));
 	
-
 	TriangleMesh * object = new TriangleMesh;
 	object->setDefaultMaterial(lightblue);
 	object->load("objects/sphere_super_smooth.obj");

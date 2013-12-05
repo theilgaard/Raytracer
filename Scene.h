@@ -30,7 +30,7 @@ public:
 	Object* getAnimation(Object* from) {
 		std::map<Object*,Object*>::const_iterator pos = animations.find(from);
 		if (pos == animations.end()){
-			cerr << "Error: Animation for object not found!";
+			std::cerr << "Error: Animation for object not found!";
 		}else{
 			return pos->second;
 		}
