@@ -13,7 +13,7 @@ extern int triangleints;
 class Triangle : public Object
 {
 public:
-    Triangle(TriangleMesh * m = 0, unsigned int i = 0);
+	Triangle(TriangleMesh * m = 0, unsigned int i = 0, Matrix4x4* fm = NULL);
     virtual ~Triangle();
 
     void setIndex(unsigned int i) {m_index = i;}
@@ -24,12 +24,16 @@ public:
     virtual void renderGL();
     virtual bool intersect(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX);
+	virtual bool intersectAnimated(HitInfo& result, const Ray& ray,
+                           float tMin = 0.0f, float tMax = MIRO_TMAX);
     virtual void preCalc();
 protected:
 	TriangleMesh::TupleI3 ti3;
 	TriangleMesh::TupleI3 ti3n;
 	Vector3 v0, v1, v2,
-			n0, n1, n2;
+			n0, n1, n2,
+			vf0, vf1, vf2,
+			nf0, nf1, nf2;
 	Vector3 n;
 	Vector3 k_ax;
 	Vector3 k_ay;

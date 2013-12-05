@@ -22,3 +22,10 @@ BLPatch::intersect(HitInfo& result, const Ray& ray,
 {
     return false;
 }
+
+bool
+BLPatch::intersectAnimated(HitInfo& result, const Ray& ray,
+                   float tMin, float tMax)
+{
+    return false;
+}

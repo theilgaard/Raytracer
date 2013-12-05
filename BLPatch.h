@@ -16,6 +16,8 @@ public:
     virtual void renderGL();
     virtual bool intersect(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX);
+	virtual bool intersectAnimated(HitInfo& result, const Ray& ray,
+                           float tMin = 0.0f, float tMax = MIRO_TMAX);
 
 protected:
     Vector3 m_verts[4];

@@ -62,7 +62,10 @@ float BBox::getbboxCost() {
 void BBox::draw(bool draw){
 	if(draw){
 		glBegin(GL_QUADS);
-			glColor3f(1.0,0,0);
+			if(isLeaf)
+				glColor3f(0.0,0.0,1.0);
+			else
+				glColor3f(1.0,0,0);
 			glVertex3f(bounds[0].x, bounds[0].y, bounds[0].z);
 			glVertex3f(bounds[1].x, bounds[0].y, bounds[0].z);
 			glVertex3f(bounds[1].x, bounds[1].y, bounds[0].z);

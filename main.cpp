@@ -265,6 +265,7 @@ void makeRefractedBallsScene(){
 
 	g_scene->preCalc();
 }
+Matrix4x4* fm;
 
 void makeAnimatedSphere(){
 	g_camera = new Camera;
@@ -303,14 +304,16 @@ void makeAnimatedSphere(){
 	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 1, Vector3(0.8), Vector3(0.2f), Vector3(0.0f));
 	
 	TriangleMesh * object = new TriangleMesh;
+	fm = &translate(0.0, 4.0, 0.0);
 	object->setDefaultMaterial(lightblue);
 	object->load("objects/sphere_super_smooth.obj");
-	g_scene->addMesh(object);
+	g_scene->addMesh(object, fm);
 
-	TriangleMesh * object2 = new TriangleMesh;
+	/*TriangleMesh * object2 = new TriangleMesh;
+	Matrix4x4 mt = translate(0.0, 4.0, 0.0);
 	object2->setDefaultMaterial(lightblue);
-	object2->load("objects/sphere_super_smooth2.obj");
-	g_scene->addMesh(object2);
+	object2->load("objects/sphere_super_smooth.obj", mt);
+	g_scene->addMesh(object2);*/
 
 
 	// Floor triangle

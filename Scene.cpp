@@ -22,11 +22,11 @@ int triangleints = 0;
 int nPhotons = 1000;
 const int maxPhotonBounces = 3;
 
-void Scene::addMesh(TriangleMesh* mesh)
+void Scene::addMesh(TriangleMesh* mesh, Matrix4x4* futureMatrix)
 {
 	for (int i = 0; i < mesh->numTris(); ++i)
 	{
-		Triangle* t = new Triangle(mesh, i);
+		Triangle* t = new Triangle(mesh, i, futureMatrix);
 
 		t->setMaterial(mesh->materials()[i]);
 		g_scene->addObject(t);
@@ -56,7 +56,7 @@ Scene::openGL(Camera *cam)
 	}
 
     if(preCalcDone){
-		//m_bvh.draw();
+		m_bvh.draw();
     }
     else{
     	cout << "Remember to do preCalc()!!!" << endl;
@@ -99,7 +99,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 	boxints = 0;
 	triangleints = 0;
 	float g = 2.2;
-	const int samples = 1;
+	const int samples = 10;
     
     int start = glutGet(GLUT_ELAPSED_TIME);
     // loop over all pixels in the image
@@ -112,7 +112,8 @@ Scene::raytraceImage(Camera *cam, Image *img)
         	for(int s = 0; s < samples; s++){						// Stochastic sampling
 				float dx = 0.5 * (rand() / (float)RAND_MAX) - 1.0;
 				float dy = 0.5 * (rand() / (float)RAND_MAX) - 1.0;
-				ray = cam->eyeRay(i + dx, j + dy, img->width(), img->height(), 1.00029);
+				float time = (rand() / (float)RAND_MAX);
+				ray = cam->eyeRay(i + dx, j + dy, img->width(), img->height(), 1.00029, time);
 				nrays++;
 				if (trace(hitInfo, ray))
 				{
