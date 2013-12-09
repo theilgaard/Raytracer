@@ -302,17 +302,20 @@ void makeAnimatedSphere(){
 	ShadingModel* lightblue = new ShadingModel(Vector3(0.0), 1, Vector3(30.0/255.0, 144.0/255, 1.0), Vector3(0.0), Vector3(0.0)); // Light blue lambertian.
 	ShadingModel* floorMat = new ShadingModel(Vector3(.0f), 1, Vector3(0.8), Vector3(0.2f), Vector3(0.0f));
 	
+	Vector3 p0(1.0,2.0,1.0);
+	Vector3 p1(2.0,1.0,3.0);
+	float tt = 1.0;
+	Vector3 pt = lerp(p0,p1,tt);
+	printf("(%.2f,%.2f,%.2f)\n", pt.x,pt.y,pt.z);
+
 	TriangleMesh * object = new TriangleMesh;
 	object->setDefaultMaterial(lightblue);
 	object->load("objects/sphere_super_smooth.obj");
-	g_scene->addMesh(object);
-
 	TriangleMesh * object2 = new TriangleMesh;
 	object2->setDefaultMaterial(lightblue);
 	object2->load("objects/sphere_super_smooth2.obj");
-	g_scene->addMesh(object2);
-
-
+	g_scene->addMesh(object, object2);
+	
 	// Floor triangle
 	TriangleMesh * floor = new TriangleMesh;
 	floor->createSingleTriangle();
@@ -322,13 +325,13 @@ void makeAnimatedSphere(){
 	floor->setN1(Vector3(0, 1, 0));
 	floor->setN2(Vector3(0, 1, 0));
 	floor->setN3(Vector3(0, 1, 0));
-	Triangle* t = new Triangle;
+	Triangle* t = new Triangle();
 
 	t->setIndex(0);
 	t->setMesh(floor);
 	t->setMaterial(floorMat);
 	g_scene->addObject(t);
-
+	
 	g_scene->preCalc();
 }
 

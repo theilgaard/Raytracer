@@ -61,7 +61,7 @@ Vector3	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& sce
 		if (Rs != Vector3(0.0f)){
 			reflDir = ray.d + 2 * cosI * N;
 			// Trace the ray
-			Ray refL(hit.P, reflDir, eta);
+			Ray refL(hit.P, reflDir, eta, ray.time);
 			HitInfo specHitInfo;
 			if (scene.trace(specHitInfo, refL, 0.00029)){
 				Vector3 color = specHitInfo.material->shade(refL, specHitInfo, scene, bounce + 1, pMap);
@@ -81,7 +81,7 @@ Vector3	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& sce
 			refrDir = n * ray.d + (n * cosI - cosT) * N;
 			refrDir.normalize();
 			// Trace the ray
-			Ray refrR(hit.P, refrDir, eta);
+			Ray refrR(hit.P, refrDir, eta, ray.time);
 			HitInfo hitInfo;
 			if (scene.trace(hitInfo, refrR, 0.00029)){
 				Vector3 color = hitInfo.material->shade(refrR, hitInfo, scene, bounce + 1, pMap);
@@ -129,7 +129,7 @@ Vector3	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& sce
 
 			// Shadow computation
 			Vector3 E = std::max(0.0f, (nDotL * light->wattage() / (PI * falloff)));
-			Ray shadowCheck(hit.P, l, 0);
+			Ray shadowCheck(hit.P, l, 0, ray.time);
 			HitInfo temp;
 			if (!scene.trace(temp, shadowCheck, 0.0001, r)){
 				//if (!(Rs != Vector3(0.0f) || Rt != Vector3(0.0f)) || bounce > maxBounces)

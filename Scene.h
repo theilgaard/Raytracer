@@ -26,16 +26,6 @@ public:
 	void addObject(Object* pObj)        { m_objects.push_back(pObj); }
     const Objects* objects() const      {return &m_objects;}
 
-	void addAnimation(Object* from, Object* to) { animations.insert(std::make_pair(from,to)); } 
-	Object* getAnimation(Object* from) {
-		std::map<Object*,Object*>::const_iterator pos = animations.find(from);
-		if (pos == animations.end()){
-			std::cerr << "Error: Animation for object not found!";
-		}else{
-			return pos->second;
-		}
-	}
-
     void addLight(PointLight* pObj)     	{m_lights.push_back(pObj);}
     void addRecLight(RectangleLight* pObj)     	{recLights.push_back(pObj);}
     const PointLights* lights() const        {return &m_lights;}
@@ -49,6 +39,7 @@ public:
                float tMin = 0.0f, float tMax = MIRO_TMAX) const;
     void setLightPos(Vector3 lightPosition){ lightPos = lightPosition;}
     void addMesh(TriangleMesh* mesh);
+	void addMesh(TriangleMesh* mesh, TriangleMesh* mesh2);
 protected:
 	Objects m_objects;
 	std::map<Object*,Object*> animations; 

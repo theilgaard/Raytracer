@@ -97,7 +97,7 @@ Camera::drawGL()
 
 
 Ray
-Camera::eyeRay(int x, int y, int imageWidth, int imageHeight, float startEta)
+Camera::eyeRay(int x, int y, int imageWidth, int imageHeight, float startEta, float time = 0.0)
 {
     // first compute the camera coordinate system 
     // ------------------------------------------
@@ -129,5 +129,5 @@ Camera::eyeRay(int x, int y, int imageWidth, int imageHeight, float startEta)
     const float imPlaneUPos = left   + (right - left)*(((float)x+0.5f)/(float)imageWidth); 
     const float imPlaneVPos = bottom + (top - bottom)*(((float)y+0.5f)/(float)imageHeight); 
 
-    return Ray(m_eye, (imPlaneUPos*uDir + imPlaneVPos*vDir - wDir).normalize(), startEta);
+    return Ray(m_eye, (imPlaneUPos*uDir + imPlaneVPos*vDir - wDir).normalize(), startEta, time);
 }
