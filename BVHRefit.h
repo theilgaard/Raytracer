@@ -1,5 +1,5 @@
-#ifndef CSE168_BVH_H_INCLUDED
-#define CSE168_BVH_H_INCLUDED
+#ifndef CSE168_BVHRefit_H_INCLUDED
+#define CSE168_BVHRefit_H_INCLUDED
 
 #include "Miro.h"
 #include "Object.h"
@@ -8,22 +8,23 @@
 #include "AccStructure.h"
 
 
-class BVH : public AccStructure
+class BVHRefit : public AccStructure
 {
 public:
-	BVH() { nBoxes = 0; nLeafs = 0; }
+	BVHRefit() { nBoxes = 0; nLeafs = 0; }
     virtual void build(Objects * objs);
     virtual bool intersect(HitInfo& result, const Ray& ray,
                    float tMin = 0.0f, float tMax = MIRO_TMAX);
 	virtual void draw();
-protected:
-	int nBoxes;
+    
+    int nBoxes;
 	int nLeafs;
+protected:
 	BBox *root;
 	Objects *m_objects;
 	void divide(BBox* bbox, int depth);
-	bool intersectBVH(BBox* bbox, HitInfo& minHit, const Ray& ray,
+	bool intersectBVHRefit(BBox* bbox, HitInfo& minHit, const Ray& ray,
 					float tMin = 0.0f, float tMax = MIRO_TMAX) const;
 };
 
-#endif // CSE168_BVH_H_INCLUDED
+#endif // CSE168_BVHRefit_H_INCLUDED

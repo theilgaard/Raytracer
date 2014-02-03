@@ -5,9 +5,12 @@
 #include <iostream>
 #include "Miro.h"
 #include "Object.h"
-#include "BVH.h"
 #include "PointLight.h"
 #include "RectangleLight.h"
+#include "AccStructure.h"
+#include "BVH.h"
+#include "BVH4D.h"
+#include "BVHRefit.h"
 
 class Camera;
 class Image;
@@ -23,6 +26,14 @@ public:
 
 		return instance;
 	}
+
+	enum
+    {
+        ACCSTRUCT_BVH   = 0,
+        ACCSTRUCT_BVHREFIT = 1,
+		ACCSTRUCT_BVH4D = 2
+    };
+
 	void addObject(Object* pObj)        { m_objects.push_back(pObj); }
     const Objects* objects() const      {return &m_objects;}
 
@@ -39,18 +50,24 @@ public:
                float tMin = 0.0f, float tMax = MIRO_TMAX) const;
     void setLightPos(Vector3 lightPosition){ lightPos = lightPosition;}
     void addMesh(TriangleMesh* mesh);
-	void addMesh(TriangleMesh* mesh, TriangleMesh* mesh2);
+	void addMesh(TriangleMesh* mesh, TriangleMesh* mesh2); // mesh at start time and mesh2 at stop time
 protected:
 	Objects m_objects;
 	std::map<Object*,Object*> animations; 
-    BVH m_bvh;
+    AccStructure *m_accStruct;
+	int m_accStruct_type;
     PointLights m_lights;
     RectangleLights recLights;
     PhotonMap* pMap;
     bool preCalcDone;
     Vector3 lightPos;
+	Vector3 pixelResult[400][300];
 private:
-	Scene() { preCalcDone = false; };                   // Constructor? (the {} brackets) are needed here.
+	Scene() { 
+		m_accStruct_type = ACCSTRUCT_BVH;
+		m_accStruct = NULL;
+		preCalcDone = false; 
+	};                   // Constructor? (the {} brackets) are needed here.
     // Dont forget to declare these two. You want to make sure they
     // are unaccessable otherwise you may accidently get copies of
     // your singleton appearing.

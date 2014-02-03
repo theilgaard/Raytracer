@@ -64,12 +64,14 @@ Triangle::renderGL()
 	}
 }
 
+void
+Triangle::interpolate(float time){
+}
+
 bool
 Triangle::intersectAnimated(HitInfo& result, const Ray& r, float tMin, float tMax)
 {
-        // Interpolate the triangle to it's time position.
-
-                
+        // Interpolate the triangle to it's time position.            
         Vector3 i = lerp(v0,vf0,r.time);
         Vector3 j = lerp(v1,vf1,r.time);
         Vector3 k = lerp(v2,vf2,r.time);
@@ -223,5 +225,4 @@ void Triangle::preCalc(){
 	k_cx = Vector3(v0.y*v1.z - v0.z*v1.y, v0.z - v1.z, v1.y - v0.y)*(-1.0f / 6.0f);
 	k_cy = Vector3(v0.z*v1.x - v0.x*v1.z, v0.x - v1.x, v1.z - v0.z)*(-1.0f / 6.0f);
 	k_cz = Vector3(v0.x*v1.y - v0.y*v1.x, v0.y - v1.y, v1.x - v0.x)*(-1.0f / 6.0f);
-
 }

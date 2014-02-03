@@ -1,4 +1,4 @@
-#include "BVH.h"
+#include "BVH4D.h"
 #include "Ray.h"
 #include "Console.h"
 #include <cstdlib>
@@ -11,9 +11,9 @@ struct objectCmp {
 	{
 		return obj1->centroid[axis] < obj2->centroid[axis];
 	}
-} cmp;
+} cmp4d;
 
-void BVH::divide(BBox* bbox, int depth)
+void BVH4D::divide(BBox* bbox, int depth)
 {
 	nBoxes++;
 	if (bbox->lastElement - bbox->firstElement <= 3) {
@@ -22,8 +22,8 @@ void BVH::divide(BBox* bbox, int depth)
 	} else {
 		bbox->isLeaf = false;
 		int axis = depth % 3;
-		cmp.axis = axis;
-		std::sort(m_objects->begin() + bbox->firstElement, m_objects->begin() + bbox->lastElement, cmp);
+		cmp4d.axis = axis;
+		std::sort(m_objects->begin() + bbox->firstElement, m_objects->begin() + bbox->lastElement, cmp4d);
 		BBox* child1 = new BBox();
 		BBox* child2 = new BBox();
 		child1->firstElement = bbox->firstElement;
@@ -58,7 +58,7 @@ void BVH::divide(BBox* bbox, int depth)
 }
 
 void
-BVH::build(Objects * objs)
+BVH4D::build(Objects * objs)
 {
 	m_objects = objs;
 	root = new BBox();
@@ -67,11 +67,9 @@ BVH::build(Objects * objs)
 	root->calcDimensions(m_objects);
 
 	divide(root, 0);
-	printf("Number of leaf nodes: %i\n", nLeafs);
-	printf("Number of non-leaf nodes: %i\n", nBoxes-nLeafs);
 }
 
-bool BVH::intersectBVH(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, float tMax) const
+bool BVH4D::intersectBVH4D(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, float tMax) const
 {
 	bool hit = false;
 	HitInfo tempMinHit;
@@ -86,8 +84,8 @@ bool BVH::intersectBVH(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, 
 			}
 		}
 		else {
-			bool child1Hit = intersectBVH(bbox->child1, minHit, ray, tMin, tMax);
-			bool child2Hit = intersectBVH(bbox->child2, minHit, ray, tMin, tMax);
+			bool child1Hit = intersectBVH4D(bbox->child1, minHit, ray, tMin, tMax);
+			bool child2Hit = intersectBVH4D(bbox->child2, minHit, ray, tMin, tMax);
 			hit = (child1Hit || child2Hit);
 		}
 	}
@@ -95,13 +93,13 @@ bool BVH::intersectBVH(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, 
 }
 
 bool
-BVH::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
+BVH4D::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
 {
 	minHit.t = MIRO_TMAX;
-	return intersectBVH(root, minHit, ray, tMin, tMax);
+	return intersectBVH4D(root, minHit, ray, tMin, tMax);
 }
 
 void 
-BVH::draw() {
+BVH4D::draw() {
 	root->draw(true);
 }

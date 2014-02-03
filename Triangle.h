@@ -27,6 +27,7 @@ public:
 	TriangleMesh* getMesh2() { return m_mesh2; }
 
     virtual void renderGL();
+	virtual void interpolate(float time);
     virtual bool intersectAnimated(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX);
     virtual bool intersect(HitInfo& result, const Ray& ray,
@@ -40,7 +41,9 @@ protected:
 	Vector3 v0, v1, v2,
 			n0, n1, n2,
 			vf0, vf1, vf2,
-			nf0, nf1, nf2;
+			nf0, nf1, nf2,
+			vp0, vp1, vp2,
+			np0, np1, np2;
 	Vector3 n;
 	Vector3 k_ax;
 	Vector3 k_ay;

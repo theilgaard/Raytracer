@@ -5,7 +5,7 @@
 
 extern int boxints;
 const float BOXCOST = 6.0f;
-const float OBJECTCOST = 21.0f;
+const float OBJECTCOST = 18.0f;
 
 class BBox {
 public:
@@ -13,7 +13,7 @@ public:
 	Vector3 bounds[2];
 	int axis, firstElement, lastElement;
 	bool isLeaf;
-	BBox *child1, *child2;
+	BBox *child1, *child2, *parent;
 	bool intersect(const Ray& ray, float tmin, float tmax);
 	void calcDimensions(Objects * objs);
 	float surfaceArea();
