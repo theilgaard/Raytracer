@@ -1,6 +1,7 @@
 //#include "windows.h"
 
 #include "Miro.h"
+#include "Console.h"
 #include "Scene.h"
 #include "Camera.h"
 #include "Image.h"
@@ -81,12 +82,7 @@ Scene::openGL(Camera *cam)
 void
 Scene::preCalc()
 {
-	Objects::iterator it;
-	for (it = m_objects.begin(); it != m_objects.end(); it++)
-	{
-		Object* pObject = *it;
-		pObject->preCalc();
-	}
+	bool encapsulateBoth = false;
 
 	// Determine Acceleration structure
 	switch(m_accStruct_type){
@@ -102,13 +98,31 @@ Scene::preCalc()
 		m_accStruct = bvhrefit;
 		break;
 		}
+	case ACCSTRUCT_BVHREFITFULL:
+		{
+		BVHRefit *bvhrefit = new BVHRefit();
+		m_accStruct = bvhrefit;
+		encapsulateBoth = true;
+		break;
+		}
 	case ACCSTRUCT_BVH:
 	default:
 		{
 		BVH *bvh = new BVH();
 		m_accStruct = bvh;
+		encapsulateBoth = true;
 		break;
 		}
+	}
+
+	// Precalc objects. (Bounding boxes, etc.)
+	Objects::iterator it;
+	for (it = m_objects.begin(); it != m_objects.end(); it++)
+	{
+		Object* pObject = *it;
+		((Triangle*)pObject)->setEncapsulateBoth(encapsulateBoth);
+		pObject->preCalc();
+		
 	}
 
 	printf("[+] Building Acceleration Structure...\n");
@@ -173,12 +187,14 @@ Scene::raytraceImage(Camera *cam, Image *img)
 			}
 		//   img->drawScanline(j);
 		//    glFinish();
+			
 			int end = glutGet(GLUT_ELAPSED_TIME);
 			int est = ((end - start) / (j + 1)) * (img->height() - j - 1) * (t + 1) * temporalSamples;
-			printf("Rendering Progress: %.3f%% ", (t  *img->height() + j) / (temporalSamples * float(img->height())) * 100.f);
-			printf("Estimated time left: %i min and %i sec\r", est/60000, (est/1000) % 60);
+			printf("Rendering Progress: %.3f%% \r", (t  *img->height() + j) / (temporalSamples * float(img->height())) * 100.f);
+			//printf("Estimated time left: %i min and %i sec\r", est/60000, (est/1000) % 60);
 			fflush(stdout);
 		}
+		openGL(cam); // Outcomment this for (slightly) added performance. 
 	}
     int end = glutGet(GLUT_ELAPSED_TIME);
 

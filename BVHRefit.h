@@ -11,12 +11,15 @@
 class BVHRefit : public AccStructure
 {
 public:
-	BVHRefit() { nBoxes = 0; nLeafs = 0; }
+	BVHRefit() { nBoxes = 0; nLeafs = 0, time = -1.f; }
     virtual void build(Objects * objs);
     virtual bool intersect(HitInfo& result, const Ray& ray,
                    float tMin = 0.0f, float tMax = MIRO_TMAX);
 	virtual void draw();
+
+	void refit(BBox* bbox);
     
+	float time;
     int nBoxes;
 	int nLeafs;
 protected:

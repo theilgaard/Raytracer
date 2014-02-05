@@ -22,17 +22,17 @@ public:
     void setIndex(unsigned int i) {m_index = i;}
     void setMesh(TriangleMesh* m) {m_mesh = m;}
 	void setMesh2(TriangleMesh* m) {m_mesh2 = m;}
+	void setEncapsulateBoth(bool v) {encapsulateBoth = v;}
 
 	TriangleMesh* getMesh() { return m_mesh; }
 	TriangleMesh* getMesh2() { return m_mesh2; }
 
     virtual void renderGL();
 	virtual void interpolate(float time);
-    virtual bool intersectAnimated(HitInfo& result, const Ray& ray,
-                           float tMin = 0.0f, float tMax = MIRO_TMAX);
     virtual bool intersect(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX);
     virtual void preCalc();
+	virtual void reCalc();
 protected:
 	TriangleMesh::TupleI3 ti3;
 	TriangleMesh::TupleI3 ti3n;
@@ -56,6 +56,7 @@ protected:
 	Vector3 k_cz;
     TriangleMesh* m_mesh;
 	TriangleMesh* m_mesh2;
+	bool encapsulateBoth;
     unsigned int m_index;
 };
 

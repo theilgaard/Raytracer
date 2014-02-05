@@ -98,6 +98,15 @@ bool
 BVH::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
 {
 	minHit.t = MIRO_TMAX;
+
+	if(time != ray.time){
+		time = ray.time;
+		for(int i = 0; i < m_objects->size(); i++){
+			(*m_objects)[i]->interpolate(time);
+			(*m_objects)[i]->reCalc();
+		}
+	}
+
 	return intersectBVH(root, minHit, ray, tMin, tMax);
 }
 

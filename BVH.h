@@ -11,12 +11,13 @@
 class BVH : public AccStructure
 {
 public:
-	BVH() { nBoxes = 0; nLeafs = 0; }
+	BVH() { nBoxes = 0; nLeafs = 0, time = 0.0f; }
     virtual void build(Objects * objs);
     virtual bool intersect(HitInfo& result, const Ray& ray,
                    float tMin = 0.0f, float tMax = MIRO_TMAX);
 	virtual void draw();
 protected:
+	float time;
 	int nBoxes;
 	int nLeafs;
 	BBox *root;

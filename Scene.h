@@ -31,7 +31,8 @@ public:
     {
         ACCSTRUCT_BVH   = 0,
         ACCSTRUCT_BVHREFIT = 1,
-		ACCSTRUCT_BVH4D = 2
+		ACCSTRUCT_BVHREFITFULL = 2,
+		ACCSTRUCT_BVH4D = 3
     };
 
 	void addObject(Object* pObj)        { m_objects.push_back(pObj); }
@@ -64,7 +65,7 @@ protected:
 	Vector3 pixelResult[400][300];
 private:
 	Scene() { 
-		m_accStruct_type = ACCSTRUCT_BVH;
+		m_accStruct_type = ACCSTRUCT_BVHREFITFULL;
 		m_accStruct = NULL;
 		preCalcDone = false; 
 	};                   // Constructor? (the {} brackets) are needed here.

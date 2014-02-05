@@ -50,6 +50,8 @@ void BVHRefit::divide(BBox* bbox, int depth)
 		child2->firstElement = minSplitPos + 1;
 		child1->calcDimensions(m_objects);
 		child2->calcDimensions(m_objects);
+		child1->parent = bbox;
+		child2->parent = bbox;
 		divide(child1, depth + 1);
 		divide(child2, depth + 1);
 		bbox->child1 = child1;
@@ -69,7 +71,30 @@ BVHRefit::build(Objects * objs)
 	divide(root, 0);
 }
 
-bool BVHRefit::intersectBVHRefit(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, float tMax) const
+void
+BVHRefit::refit(BBox* bbox){
+	if(bbox->isLeaf){
+	//	Objects *obs = new std::vector<Object*>();
+	//	for (int i = bbox->firstElement; i < bbox->lastElement; ++i) {
+		//	obs->push_back((*m_objects)[i]);
+		//}
+		//if(bbox->firstElement == 0) bbox->lastElement--;
+		bbox->calcDimensions(m_objects);
+		//if(bbox->firstElement == 0) bbox->lastElement++;
+	}else{
+		refit(bbox->child1);
+		refit(bbox->child2);
+		bbox->bounds[0].x = std::min(bbox->child1->bounds[0].x, bbox->child2->bounds[0].x);  // bounds[0] == max
+		bbox->bounds[0].y = std::min(bbox->child1->bounds[0].y, bbox->child2->bounds[0].y);  // bounds[0] == max
+		bbox->bounds[0].z = std::min(bbox->child1->bounds[0].z, bbox->child2->bounds[0].z);  // bounds[0] == max
+		bbox->bounds[1].x = std::max(bbox->child1->bounds[1].x, bbox->child2->bounds[1].x);  // bounds[1] == min
+		bbox->bounds[1].y = std::max(bbox->child1->bounds[1].y, bbox->child2->bounds[1].y);  // bounds[1] == min
+		bbox->bounds[1].z = std::max(bbox->child1->bounds[1].z, bbox->child2->bounds[1].z);  // bounds[1] == min
+	}
+}
+
+bool 
+BVHRefit::intersectBVHRefit(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, float tMax) const
 {
 	bool hit = false;
 	HitInfo tempMinHit;
@@ -96,6 +121,17 @@ bool
 BVHRefit::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
 {
 	minHit.t = MIRO_TMAX;
+
+	// Refit the BVH to current timestep.
+	if(time != ray.time){
+		time = ray.time;
+		for(int i = 0; i < m_objects->size(); i++){
+			(*m_objects)[i]->interpolate(time);
+			(*m_objects)[i]->reCalc();
+		}
+		refit(root);
+	}
+
 	return intersectBVHRefit(root, minHit, ray, tMin, tMax);
 }
 

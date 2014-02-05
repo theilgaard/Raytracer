@@ -12,6 +12,7 @@ public:
 	BBox();
 	Vector3 bounds[2];
 	int axis, firstElement, lastElement;
+	float startTime, endTime;
 	bool isLeaf;
 	BBox *child1, *child2, *parent;
 	bool intersect(const Ray& ray, float tmin, float tmax);
