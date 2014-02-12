@@ -54,7 +54,6 @@ public:
 	void addMesh(TriangleMesh* mesh, TriangleMesh* mesh2); // mesh at start time and mesh2 at stop time
 protected:
 	Objects m_objects;
-	std::map<Object*,Object*> animations; 
     AccStructure *m_accStruct;
 	int m_accStruct_type;
     PointLights m_lights;
@@ -63,11 +62,15 @@ protected:
     bool preCalcDone;
     Vector3 lightPos;
 	Vector3 pixelResult[400][300];
+	int samples;
+	int temporalSamples;
 private:
 	Scene() { 
-		m_accStruct_type = ACCSTRUCT_BVHREFITFULL;
+		m_accStruct_type = ACCSTRUCT_BVH4D;
 		m_accStruct = NULL;
 		preCalcDone = false; 
+		samples = 1;
+		temporalSamples = 3;
 	};                   // Constructor? (the {} brackets) are needed here.
     // Dont forget to declare these two. You want to make sure they
     // are unaccessable otherwise you may accidently get copies of

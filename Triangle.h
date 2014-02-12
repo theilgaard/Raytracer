@@ -32,7 +32,6 @@ public:
     virtual bool intersect(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX);
     virtual void preCalc();
-	virtual void reCalc();
 protected:
 	TriangleMesh::TupleI3 ti3;
 	TriangleMesh::TupleI3 ti3n;
@@ -44,6 +43,7 @@ protected:
 			nf0, nf1, nf2,
 			vp0, vp1, vp2,
 			np0, np1, np2;
+	float prevTime;
 	Vector3 n;
 	Vector3 k_ax;
 	Vector3 k_ay;
@@ -58,6 +58,7 @@ protected:
 	TriangleMesh* m_mesh2;
 	bool encapsulateBoth;
     unsigned int m_index;
+	virtual void reCalc();
 };
 
 #endif // CSE168_TRIANGLE_H_INCLUDED

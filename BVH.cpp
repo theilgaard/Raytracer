@@ -103,7 +103,6 @@ BVH::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
 		time = ray.time;
 		for(int i = 0; i < m_objects->size(); i++){
 			(*m_objects)[i]->interpolate(time);
-			(*m_objects)[i]->reCalc();
 		}
 	}
 

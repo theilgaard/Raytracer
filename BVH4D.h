@@ -11,7 +11,7 @@
 class BVH4D : public AccStructure
 {
 public:
-	BVH4D() { nBoxes = 0; nLeafs = 0; }
+	BVH4D(int tempSamples) : temporalSamples(tempSamples) { nBoxes = 0; nLeafs = 0; }
     virtual void build(Objects * objs);
     virtual bool intersect(HitInfo& result, const Ray& ray,
                    float tMin = 0.0f, float tMax = MIRO_TMAX);
@@ -19,6 +19,7 @@ public:
 protected:
 	int nBoxes;
 	int nLeafs;
+	int temporalSamples;
 	BBox *root;
 	Objects *m_objects;
 	void divide(BBox* bbox, int depth);

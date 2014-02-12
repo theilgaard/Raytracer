@@ -18,7 +18,7 @@ public:
 
     virtual void renderGL() {}
     virtual void preCalc() {}
-	virtual void reCalc() {}
+	
 	virtual void interpolate(float time) {}
 
     virtual bool intersect(HitInfo& result, const Ray& ray,
@@ -26,6 +26,7 @@ public:
 
 protected:
     ShadingModel* m_material;
+	virtual void reCalc() {}
 };
 
 typedef std::vector<Object*> Objects;

@@ -88,7 +88,7 @@ Scene::preCalc()
 	switch(m_accStruct_type){
 	case ACCSTRUCT_BVH4D:
 		{
-		BVH4D *bvh4d = new BVH4D();
+		BVH4D *bvh4d = new BVH4D(temporalSamples);
 		m_accStruct = bvh4d;
 		break;
 		}
@@ -148,8 +148,6 @@ Scene::raytraceImage(Camera *cam, Image *img)
 	boxints = 0;
 	triangleints = 0;
 	float g = 2.2;
-	const int samples = 1;
-	const int temporalSamples = 10;
     srand(static_cast <unsigned> (time(0))); // Seed the random numbers. 
 
     int start = glutGet(GLUT_ELAPSED_TIME);
@@ -190,6 +188,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 			
 			int end = glutGet(GLUT_ELAPSED_TIME);
 			int est = ((end - start) / (j + 1)) * (img->height() - j - 1) * (t + 1) * temporalSamples;
+			printf("Time: %f \t | ", time);
 			printf("Rendering Progress: %.3f%% \r", (t  *img->height() + j) / (temporalSamples * float(img->height())) * 100.f);
 			//printf("Estimated time left: %i min and %i sec\r", est/60000, (est/1000) % 60);
 			fflush(stdout);

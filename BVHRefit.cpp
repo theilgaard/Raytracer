@@ -74,13 +74,7 @@ BVHRefit::build(Objects * objs)
 void
 BVHRefit::refit(BBox* bbox){
 	if(bbox->isLeaf){
-	//	Objects *obs = new std::vector<Object*>();
-	//	for (int i = bbox->firstElement; i < bbox->lastElement; ++i) {
-		//	obs->push_back((*m_objects)[i]);
-		//}
-		//if(bbox->firstElement == 0) bbox->lastElement--;
 		bbox->calcDimensions(m_objects);
-		//if(bbox->firstElement == 0) bbox->lastElement++;
 	}else{
 		refit(bbox->child1);
 		refit(bbox->child2);
@@ -127,7 +121,6 @@ BVHRefit::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
 		time = ray.time;
 		for(int i = 0; i < m_objects->size(); i++){
 			(*m_objects)[i]->interpolate(time);
-			(*m_objects)[i]->reCalc();
 		}
 		refit(root);
 	}

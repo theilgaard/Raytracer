@@ -11,13 +11,16 @@ class BBox {
 public:
 	BBox();
 	Vector3 bounds[2];
+	Vector4 bounds4D[2];
 	int axis, firstElement, lastElement;
-	float startTime, endTime;
 	bool isLeaf;
 	BBox *child1, *child2, *parent;
 	bool intersect(const Ray& ray, float tmin, float tmax);
+	bool intersect4D(const Ray& ray, float tmin, float tmax);
 	void calcDimensions(Objects * objs);
+	void calcDimensions4D(Objects * objs, float sT, float eT);
 	float surfaceArea();
+	float surfaceArea4D();
 	float getbboxCost();
 	void draw(bool draw);
 	void print(std::string s = "");

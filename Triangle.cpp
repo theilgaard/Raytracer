@@ -64,17 +64,23 @@ Triangle::renderGL()
 	}
 }
 
+// Expensive! 
 void
 Triangle::interpolate(float time){
 	if(m_mesh2 != 0){
-		vp0 = lerp(v0,vf0,time);
-		vp1 = lerp(v1,vf1,time);
-        vp2 = lerp(v2,vf2,time);
+		if(time != prevTime){
+			vp0 = lerp(v0,vf0,time);
+			vp1 = lerp(v1,vf1,time);
+			vp2 = lerp(v2,vf2,time);
 
-		// Should the normals be interpolated as well?
-        np0 = n0;
-        np1 = n1;
-		np2 = n2;
+			// Should the normals be interpolated as well?
+			np0 = n0;
+			np1 = n1;
+			np2 = n2;
+			
+			reCalc(); 
+			prevTime = time;
+		}
 	}
 }
 
