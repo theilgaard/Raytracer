@@ -305,9 +305,11 @@ void makeAnimatedSphere(){
 	TriangleMesh * object = new TriangleMesh;
 	object->setDefaultMaterial(lightblue);
 	object->load("objects/sphere_super_smooth.obj");
+	//object->load("objects/cube3.obj");
 	TriangleMesh * object2 = new TriangleMesh;
 	object2->setDefaultMaterial(lightblue);
 	object2->load("objects/sphere_super_smooth2.obj");
+	//object2->load("objects/cube2.obj");
 	g_scene->addMesh(object, object2);
 	
 	// Floor triangle
@@ -326,6 +328,14 @@ void makeAnimatedSphere(){
 	t->setMaterial(floorMat);
 	g_scene->addObject(t);
 	
+	Vector4 a = Vector4(1.0,2.0,4.0,8.0);
+	Vector4 b = Vector4(0.9,1.9,4.0,7.0);
+
+	if(a > b)
+		printf("true\n");
+	else
+		printf("false\n");
+
 	g_scene->preCalc();
 }
 

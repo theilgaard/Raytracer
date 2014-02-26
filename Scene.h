@@ -70,7 +70,7 @@ private:
 		m_accStruct = NULL;
 		preCalcDone = false; 
 		samples = 1;
-		temporalSamples = 3;
+		temporalSamples = 2;
 	};                   // Constructor? (the {} brackets) are needed here.
     // Dont forget to declare these two. You want to make sure they
     // are unaccessable otherwise you may accidently get copies of

@@ -153,8 +153,9 @@ Scene::raytraceImage(Camera *cam, Image *img)
     int start = glutGet(GLUT_ELAPSED_TIME);
     // loop over all pixels in the image
 	for(int t = 0; t < temporalSamples; t++){	// Temporal Stochastic sampling
+		t = 1;
 		//float time = (rand() / (float)RAND_MAX); // Randomly or uniformly
-		float time = t/float(temporalSamples);
+		float time = float(t)/float(temporalSamples);
 		for (int j = 0; j < img->height(); ++j){
 			for (int i = 0; i < img->width(); ++i){
 				Vector3 pixelSum;
@@ -194,6 +195,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 			fflush(stdout);
 		}
 		openGL(cam); // Outcomment this for (slightly) added performance. 
+		break;
 	}
     int end = glutGet(GLUT_ELAPSED_TIME);
 

@@ -13,7 +13,7 @@ public:
 	Vector3 bounds[2];
 	Vector4 bounds4D[2];
 	int axis, firstElement, lastElement;
-	bool isLeaf;
+	bool isLeaf, isTimesplit;
 	BBox *child1, *child2, *parent;
 	bool intersect(const Ray& ray, float tmin, float tmax);
 	bool intersect4D(const Ray& ray, float tmin, float tmax);

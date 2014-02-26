@@ -16,12 +16,17 @@ struct objectCmp {
 void BVH4D::divide(BBox* bbox, int depth)
 {
 	nBoxes++;
-	if (bbox->lastElement - bbox->firstElement <= 3) {
+	if (bbox->lastElement - bbox->firstElement <= 3 || (bbox->bounds4D[1].w - bbox->bounds4D[0].w) <= (1.0f/(temporalSamples*10))) {
 		bbox->isLeaf = true;
 		nLeafs++;
 	} else {
 		bbox->isLeaf = false;
-		int axis = depth % 4;
+		int axis;
+		if(temporalSamples == 1){ // Static or motion-blured scene?
+			axis = depth % 3;
+		}else{
+			axis = depth % 4;
+		}
 		BBox* child1 = new BBox();
 		BBox* child2 = new BBox();
 		if(axis != 3){
@@ -52,16 +57,22 @@ void BVH4D::divide(BBox* bbox, int depth)
 			child1->calcDimensions4D(m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 			child2->calcDimensions4D(m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 		}else{
-			// Timesplit!
-			for(int d = 0; d < depth; d++){
-				printf(".");
-			}
-			printf("Time: [%.3f ; %.3f] Objs: %d\n", bbox->bounds4D[0].w, bbox->bounds4D[1].w, bbox->lastElement - bbox->firstElement);
+		//	// Timesplit!
+		//	for(int d = 0; d < depth; d++){
+		//		printf(".");
+		//	}
+		//	printf("Time: [%.4f ; %.4f] Objs: %d\n", bbox->bounds4D[0].w, bbox->bounds4D[1].w, bbox->lastElement - bbox->firstElement);
+			tSplits++;
+			bbox->isTimesplit = true;
+		//	std::sort(m_objects->begin() + bbox->firstElement, m_objects->begin() + bbox->lastElement, cmp4d);
 			child1->firstElement = child2->firstElement = bbox->firstElement;
 			child1->lastElement = child2->lastElement = bbox->lastElement;
-			child1->calcDimensions4D(m_objects, bbox->bounds4D[0].w, (bbox->bounds4D[0].w+bbox->bounds4D[1].w)/2.0f);
-			child2->calcDimensions4D(m_objects, (bbox->bounds4D[0].w+bbox->bounds4D[1].w)/2.0f, bbox->bounds4D[1].w);
+			float timeSplit = (bbox->bounds4D[0].w + bbox->bounds4D[1].w)/2.0f;
+			child1->calcDimensions4D(m_objects, bbox->bounds4D[0].w, timeSplit);
+			child2->calcDimensions4D(m_objects, timeSplit, bbox->bounds4D[1].w);
 		}
+		child1->parent = bbox;
+		child2->parent = bbox;
 		divide(child1, depth + 1);
 		divide(child2, depth + 1);
 		bbox->child1 = child1;
@@ -69,16 +80,55 @@ void BVH4D::divide(BBox* bbox, int depth)
 	}
 }
 
+bool checkBb(BBox *bbox){
+	bool isValid = true;
+	if(bbox->parent != 0){
+		if(bbox->bounds4D[0] < bbox->parent->bounds4D[0]){ // Min check
+			printf("[!] Min ");
+			printf("Px: %.8f, Py: %.8f, Pz: %.8f, Pw: %.8f |\n   \tCx: %.8f, Cy: %.8f, Cz: %.8f, Cw: %.8f\n", bbox->parent->bounds4D[0].x,bbox->parent->bounds4D[0].y,bbox->parent->bounds4D[0].z,bbox->parent->bounds4D[0].w,
+																													  bbox->bounds4D[0].x,bbox->bounds4D[0].y,bbox->bounds4D[0].z,bbox->bounds4D[0].w);
+			isValid = false;
+		}
+		if(bbox->bounds4D[1] > bbox->parent->bounds4D[1]){ // Max check
+			printf("[!] Max ");
+			printf("Px: %.8f, Py: %.8f, Pz: %.8f, Pw: %.8f |\n   \tCx: %.8f, Cy: %.8f, Cz: %.8f, Cw: %.8f\n", bbox->parent->bounds4D[1].x,bbox->parent->bounds4D[1].y,bbox->parent->bounds4D[1].z,bbox->parent->bounds4D[1].w,
+																													  bbox->bounds4D[1].x,bbox->bounds4D[1].y,bbox->bounds4D[1].z,bbox->bounds4D[1].w);
+			printf("Timesplit parent: %d\n", bbox->parent->isTimesplit? 1 : 0);
+			isValid = false;
+		}
+	}
+
+	if(bbox->isLeaf){
+		return isValid;
+	}else{
+		bool e1 = checkBb(bbox->child1);
+		bool e2 = checkBb(bbox->child2);
+		isValid = (e1 && e2);
+	}
+	return isValid;
+}
+
 void
 BVH4D::build(Objects * objs)
 {
 	m_objects = objs;
 	root = new BBox();
+	root->parent = 0;
 	root->firstElement = 0;
 	root->lastElement = m_objects->size() - 1;
 	root->calcDimensions4D(m_objects, 0.0f, 1.0f);
 
 	divide(root, 0);
+
+	printf("[-]  Total Bboxes: %d\n", nBoxes);
+	printf("[-]  Total Leafs: %d\n", nLeafs);
+	printf("[-]  Total Time splits: %d\n", tSplits);
+
+	printf("[-]   Checking for errors...\n");
+	if(checkBb(root))
+		printf("[-]   Success, 4D BVH is valid!\n");
+	else
+		printf("[-]   ERROR! 4D BVH Contains invalid nodes!\n");
 }
 
 bool BVH4D::intersectBVH4D(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, float tMax) const
@@ -114,5 +164,6 @@ BVH4D::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
 
 void 
 BVH4D::draw() {
-	root->draw(true);
+	// Does not make sense in 4D
+	//root->draw(true);
 }

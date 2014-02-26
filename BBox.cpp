@@ -80,14 +80,20 @@ void BBox::calcDimensions(Objects * objs){
 }
 
 void BBox::calcDimensions4D(Objects * objs, float startTime, float endTime){
-	bounds4D[0] = Vector4(INFINITY, INFINITY, INFINITY, startTime);		// Min
+	bounds4D[0] = Vector4(INFINITY, INFINITY, INFINITY, startTime);	 // Min
 	bounds4D[1] = Vector4(-INFINITY, -INFINITY, -INFINITY, endTime); // Max
 	for (int i = firstElement; i <= lastElement; i++) {
 		(*objs)[i]->interpolate(startTime);
 		bounds4D[0].x = bounds4D[0].x < (*objs)[i]->min.x ? bounds4D[0].x : (*objs)[i]->min.x;
 		bounds4D[0].y = bounds4D[0].y < (*objs)[i]->min.y ? bounds4D[0].y : (*objs)[i]->min.y;
 		bounds4D[0].z = bounds4D[0].z < (*objs)[i]->min.z ? bounds4D[0].z : (*objs)[i]->min.z;
+		bounds4D[1].x = bounds4D[1].x > (*objs)[i]->max.x ? bounds4D[1].x : (*objs)[i]->max.x;
+		bounds4D[1].y = bounds4D[1].y > (*objs)[i]->max.y ? bounds4D[1].y : (*objs)[i]->max.y;
+		bounds4D[1].z = bounds4D[1].z > (*objs)[i]->max.z ? bounds4D[1].z : (*objs)[i]->max.z;
 		(*objs)[i]->interpolate(endTime);
+		bounds4D[0].x = bounds4D[0].x < (*objs)[i]->min.x ? bounds4D[0].x : (*objs)[i]->min.x;
+		bounds4D[0].y = bounds4D[0].y < (*objs)[i]->min.y ? bounds4D[0].y : (*objs)[i]->min.y;
+		bounds4D[0].z = bounds4D[0].z < (*objs)[i]->min.z ? bounds4D[0].z : (*objs)[i]->min.z;
 		bounds4D[1].x = bounds4D[1].x > (*objs)[i]->max.x ? bounds4D[1].x : (*objs)[i]->max.x;
 		bounds4D[1].y = bounds4D[1].y > (*objs)[i]->max.y ? bounds4D[1].y : (*objs)[i]->max.y;
 		bounds4D[1].z = bounds4D[1].z > (*objs)[i]->max.z ? bounds4D[1].z : (*objs)[i]->max.z;

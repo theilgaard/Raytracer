@@ -100,6 +100,13 @@ public:
     const Vector4 & operator-=(float a) {x -= a; y -= a; z -= a; w -= w; return *this;}
     //@}
 
+	bool operator>(Vector4 o){
+		return (x > o.x) && (y > o.x) && (z > o.z) && (w > o.w);
+	}
+
+	bool operator<(Vector4 o){
+		return (x < o.x) && (y < o.x) && (z < o.z) && (w < o.w);
+	}
 
     //! Scalar multiplication operator.
     Vector4 operator*(float a) const {return Vector4(x * a, y * a, z * a, w * a);}
