@@ -80,6 +80,7 @@
     <ClCompile Include="BLPatch.cpp" />
     <ClCompile Include="BVH.cpp" />
     <ClCompile Include="BVH4D.cpp" />
+    <ClCompile Include="BVH4D2d.cpp" />
     <ClCompile Include="BVHRefit.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CircleLight.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="BLPatch.h" />
     <ClInclude Include="BVH.h" />
     <ClInclude Include="BVH4D.h" />
+    <ClInclude Include="BVH4D2d.h" />
     <ClInclude Include="BVHRefit.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CircleLight.h" />

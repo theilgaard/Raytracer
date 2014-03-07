@@ -3,11 +3,6 @@
 #include "BBox.h"
 #include "Ray.h"
 
-
-BBox::BBox(){
-
-}
-
 bool
 BBox::intersect(const Ray& r, float tMin, float tMax)
 {
@@ -117,10 +112,13 @@ float BBox::getbboxCost() {
 	return OBJECTCOST*(lastElement - firstElement);
 }
 
-void BBox::draw(bool draw){
+void BBox::draw(bool draw, int depth){
+	float blue = 0.0;
+	if(depth != -1)
+		blue = depth * 0.2;
 	if(draw){
 		glBegin(GL_QUADS);
-			glColor3f(1.0,0,0);
+			glColor3f(1.0,0,blue);
 			glVertex3f(bounds[0].x, bounds[0].y, bounds[0].z);
 			glVertex3f(bounds[1].x, bounds[0].y, bounds[0].z);
 			glVertex3f(bounds[1].x, bounds[1].y, bounds[0].z);
@@ -143,10 +141,55 @@ void BBox::draw(bool draw){
 		glEnd();
 	}
 	if (!(this->isLeaf)){
-		child1->draw(draw);
-		child2->draw(draw);
+		if(depth != -1){
+			child1->draw(draw, depth+1);
+			child2->draw(draw, depth+1);
+		}else{
+			child1->draw(draw);
+			child2->draw(draw);
+		}
 	}
 }
+
+void BBox::draw4D(bool draw, int depth){
+	float blue = 0.0;
+	if(depth != -1)
+		blue = depth * 0.1;
+	if(draw){
+		glBegin(GL_QUADS);
+			glColor3f(1.0-blue,0,blue);
+			glVertex3f(bounds4D[0].x, bounds4D[0].y, bounds4D[0].z);
+			glVertex3f(bounds4D[1].x, bounds4D[0].y, bounds4D[0].z);
+			glVertex3f(bounds4D[1].x, bounds4D[1].y, bounds4D[0].z);
+			glVertex3f(bounds4D[0].x, bounds4D[1].y, bounds4D[0].z);
+
+			glVertex3f(bounds4D[0].x, bounds4D[0].y, bounds4D[1].z);
+			glVertex3f(bounds4D[1].x, bounds4D[0].y, bounds4D[1].z);
+			glVertex3f(bounds4D[1].x, bounds4D[1].y, bounds4D[1].z);
+			glVertex3f(bounds4D[0].x, bounds4D[1].y, bounds4D[1].z);
+
+			glVertex3f(bounds4D[0].x, bounds4D[0].y, bounds4D[0].z);
+			glVertex3f(bounds4D[0].x, bounds4D[0].y, bounds4D[1].z);
+			glVertex3f(bounds4D[0].x, bounds4D[1].y, bounds4D[1].z);
+			glVertex3f(bounds4D[0].x, bounds4D[1].y, bounds4D[0].z);
+
+			glVertex3f(bounds4D[1].x, bounds4D[0].y, bounds4D[0].z);
+			glVertex3f(bounds4D[1].x, bounds4D[0].y, bounds4D[1].z);
+			glVertex3f(bounds4D[1].x, bounds4D[1].y, bounds4D[1].z);
+			glVertex3f(bounds4D[1].x, bounds4D[1].y, bounds4D[0].z);
+		glEnd();
+	}
+	if (!(this->isLeaf)){
+		if(depth != -1){
+			child1->draw4D(draw, depth+1);
+			child2->draw4D(draw, depth+1);
+		}else{
+			child1->draw4D(draw);
+			child2->draw4D(draw);
+		}
+	}
+}
+
 
 void BBox::print(std::string s){
 	printf((s + "Box: min: %f %f %f max: %f %f %f\n").c_str(), bounds[0].x, bounds[0].y, bounds[0].z, bounds[1].x, bounds[1].y, bounds[1].z);

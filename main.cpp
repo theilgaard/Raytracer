@@ -305,11 +305,13 @@ void makeAnimatedSphere(){
 	TriangleMesh * object = new TriangleMesh;
 	object->setDefaultMaterial(lightblue);
 	object->load("objects/sphere_super_smooth.obj");
-	//object->load("objects/cube3.obj");
+	//object->load("objects/cubeRot.obj");
+	//object->load("objects/sphere.obj");
 	TriangleMesh * object2 = new TriangleMesh;
 	object2->setDefaultMaterial(lightblue);
 	object2->load("objects/sphere_super_smooth2.obj");
-	//object2->load("objects/cube2.obj");
+	//object2->load("objects/cubeRot2.obj");
+	//object2->load("objects/sphere2.obj");
 	g_scene->addMesh(object, object2);
 	
 	// Floor triangle

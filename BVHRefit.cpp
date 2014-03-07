@@ -69,6 +69,9 @@ BVHRefit::build(Objects * objs)
 	root->calcDimensions(m_objects);
 
 	divide(root, 0);
+
+	printf("[-]  Total Bboxes: %d\n", nBoxes);
+	printf("[-]  Total Leafs: %d\n", nLeafs);
 }
 
 void

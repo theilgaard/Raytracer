@@ -31,7 +31,7 @@ void BVH::divide(BBox* bbox, int depth)
 		float minSplitCost = INFINITY;
 		float minSplitPos;
 
-		int step = std::max((bbox->lastElement- bbox->firstElement) / 100.0f, 1.0f);
+		int step = std::max((bbox->lastElement - bbox->firstElement) / 100.0f, 1.0f);
 		//std::cout << "Step: " << step << std::endl;
 
 		for (int i = bbox->firstElement; i < bbox->lastElement; i += step) {
@@ -111,5 +111,5 @@ BVH::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
 
 void 
 BVH::draw() {
-	root->draw(true);
+	root->draw(true,0);
 }

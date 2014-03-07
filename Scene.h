@@ -61,7 +61,7 @@ protected:
     PhotonMap* pMap;
     bool preCalcDone;
     Vector3 lightPos;
-	Vector3 pixelResult[400][300];
+	Vector3 pixelResult[4000][3000];
 	int samples;
 	int temporalSamples;
 private:
@@ -70,7 +70,7 @@ private:
 		m_accStruct = NULL;
 		preCalcDone = false; 
 		samples = 1;
-		temporalSamples = 2;
+		temporalSamples = 8;
 	};                   // Constructor? (the {} brackets) are needed here.
     // Dont forget to declare these two. You want to make sure they
     // are unaccessable otherwise you may accidently get copies of
