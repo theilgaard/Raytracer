@@ -92,6 +92,12 @@ Scene::preCalc()
 		m_accStruct = bvh4d;
 		break;
 		}
+	case ACCSTRUCT_BVH4DSAH:
+		{
+		BVH4DSAH *bvh4dsah = new BVH4DSAH(temporalSamples);
+		m_accStruct = bvh4dsah;
+		break;
+		}
 	case ACCSTRUCT_BVHREFIT:
 		{
 		BVHRefit *bvhrefit = new BVHRefit();

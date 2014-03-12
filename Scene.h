@@ -10,6 +10,7 @@
 #include "AccStructure.h"
 #include "BVH.h"
 #include "BVH4D.h"
+#include "BVH4DSAH.h"
 #include "BVHRefit.h"
 
 class Camera;
@@ -32,7 +33,8 @@ public:
         ACCSTRUCT_BVH   = 0,
         ACCSTRUCT_BVHREFIT = 1,
 		ACCSTRUCT_BVHREFITFULL = 2,
-		ACCSTRUCT_BVH4D = 3
+		ACCSTRUCT_BVH4D = 3,
+		ACCSTRUCT_BVH4DSAH = 4
     };
 
 	void addObject(Object* pObj)        { m_objects.push_back(pObj); }
@@ -66,11 +68,11 @@ protected:
 	int temporalSamples;
 private:
 	Scene() { 
-		m_accStruct_type = ACCSTRUCT_BVH4D;
+		m_accStruct_type = ACCSTRUCT_BVH4DSAH;
 		m_accStruct = NULL;
 		preCalcDone = false; 
 		samples = 1;
-		temporalSamples = 8;
+		temporalSamples = 3;
 	};                   // Constructor? (the {} brackets) are needed here.
     // Dont forget to declare these two. You want to make sure they
     // are unaccessable otherwise you may accidently get copies of
