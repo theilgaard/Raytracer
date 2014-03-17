@@ -1,4 +1,4 @@
-#include "BVH4DSAH.h"
+#include "BVH4DSAHMIX.h"
 #include "Ray.h"
 #include "Console.h"
 #include <cstdlib>
@@ -11,36 +11,35 @@ struct objectCmp {
 	{
 		return obj1->centroid[axis] < obj2->centroid[axis];
 	}
-} cmp4dsah;
+} cmp4dsahmix;
 
-void BVH4DSAH::divide(BBox* bbox, int depth)
+void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 {
 	nBoxes++;
-	if (bbox->lastElement - bbox->firstElement  <= 3 || (bbox->bounds4D[1].w - bbox->bounds4D[0].w) <= (1.0f/(temporalSamples))) {
+	if (bbox->lastElement - bbox->firstElement  <= 3) {
 		bbox->isLeaf = true;
 		nLeafs++;
 	} else {
 		bbox->isLeaf = false;
 		int axis;		
-		if(temporalSamples == 1){ // Static or motion-blured scene?
-			axis = depth % 3;
-		}else{
-			axis = depth % 4;
-		}
 		BBox* child1 = new BBox();
 		BBox* child2 = new BBox();
-		if(axis != 3){
-			cmp4dsah.axis = axis;
-			child1->m_objects = bbox->m_objects;
-			child2->m_objects = bbox->m_objects;
-			std::sort(bbox->m_objects->begin() + bbox->firstElement, bbox->m_objects->begin() + bbox->lastElement, cmp4dsah);
-			child1->firstElement = bbox->firstElement;
-			child2->lastElement = bbox->lastElement;
-			float minSplitCost = INFINITY;
-			float minSplitPos;
+		float minSplitCost = INFINITY;
+		float minSplitPos;
+		int minAxis;
+		child1->m_objects = bbox->m_objects;
+		child2->m_objects = bbox->m_objects;
+		child1->firstElement = bbox->firstElement;
+		child2->lastElement = bbox->lastElement;	
+
+		// Test 3d split
+		for(int i = 0; i < 3; i++){
+			axis = i % 3;
+			cmp4dsahmix.axis = axis;
+
+			std::sort(bbox->m_objects->begin() + bbox->firstElement, bbox->m_objects->begin() + bbox->lastElement, cmp4dsahmix);
 
 			int step = std::max((bbox->lastElement- bbox->firstElement) / 100.0f, 1.0f);
-			//std::cout << "Step: " << step << std::endl;
 
 			for (int i = bbox->firstElement; i < bbox->lastElement; i += step) {
 				child1->lastElement = i;
@@ -52,40 +51,50 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 				if (splitCost < minSplitCost) {
 					minSplitCost = splitCost;
 					minSplitPos = i;
+					minAxis = axis;
 				}
 			}
+		}
+
+		// Test time split
+		child1->firstElement = child2->firstElement = bbox->firstElement;
+		child1->lastElement = child2->lastElement = bbox->lastElement;
+		float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples*2, 0.1f);		// Time step resolution
+		for(float i = bbox->bounds4D[0].w; i < bbox->bounds4D[1].w; i += tStep){
+			float timeSplit = i;
+			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, timeSplit);
+			child2->calcDimensions4D(bbox->m_objects, timeSplit, bbox->bounds4D[1].w);
+			float splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
+				(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
+			if (splitCost < minSplitCost) {
+				tSplits++;
+				bbox->isTimesplit = true;
+				minSplitPos = splitCost;
+				minSplitPos = i;
+				minAxis = 3;
+			}
+		}
+
+		// Set child box vars according to case.
+		if(minAxis != 3){
+			cmp4dsahmix.axis = minAxis;
+			child1->m_objects = bbox->m_objects;
+			child2->m_objects = bbox->m_objects;
+			std::sort(bbox->m_objects->begin() + bbox->firstElement, bbox->m_objects->begin() + bbox->lastElement, cmp4dsahmix);
+			child1->firstElement = bbox->firstElement;
+			child2->lastElement = bbox->lastElement;	
+
+			// Left and right 3d bounding boxes. 
 			child1->lastElement = minSplitPos;
 			child2->firstElement = minSplitPos + 1;
 			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 			child2->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
-
+			child1->m_objects = bbox->m_objects;
+			child2->m_objects = bbox->m_objects;
 		}else{
-			// Timesplit!
-			//	for(int d = 0; d < depth; d++){
-			//		printf(".");
-			//	}
-			//	printf("Time: [%.4f ; %.4f] Objs: %d\n", bbox->bounds4D[0].w, bbox->bounds4D[1].w, bbox->lastElement - bbox->firstElement);
-			tSplits++;
-			bbox->isTimesplit = true;
-			child1->firstElement = child2->firstElement = bbox->firstElement;
-			child1->lastElement = child2->lastElement = bbox->lastElement;
-			float minTimesplitCost = INFINITY;
-			float minTimeSplitPos;
-			float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples*2, 0.1f);
-			for(float i = bbox->bounds4D[0].w; i < bbox->bounds4D[1].w; i += tStep){
-				float timeSplit = i;
-				child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, timeSplit);
-				child2->calcDimensions4D(bbox->m_objects, timeSplit, bbox->bounds4D[1].w);
-				float splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
-					(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
-				if (splitCost < minTimesplitCost) {
-					minTimesplitCost = splitCost;
-					minTimeSplitPos = i;
-				}
-			}
 			//float timeSplit = (bbox->bounds4D[0].w + bbox->bounds4D[1].w)/2.0f;
-			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, minTimeSplitPos);
-			child2->calcDimensions4D(bbox->m_objects, minTimeSplitPos, bbox->bounds4D[1].w);
+			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, minSplitPos);
+			child2->calcDimensions4D(bbox->m_objects, minSplitPos, bbox->bounds4D[1].w);
 			// Copy over the primitives for the timesplit children.
 			for (int i = child1->firstElement; i <= child1->lastElement; ++i) {
 				child1->m_objects->push_back((*bbox->m_objects)[i]);
@@ -106,7 +115,7 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 	}
 }
 
-bool checkBbsah(BBox *bbox){
+bool checkBbsahmix(BBox *bbox){
 	bool isValid = true;
 	if(bbox->parent != 0){ // Skip root
 		if(bbox->bounds4D[0] < bbox->parent->bounds4D[0]){ // Min check
@@ -127,15 +136,15 @@ bool checkBbsah(BBox *bbox){
 	if(bbox->isLeaf){
 		return isValid;
 	}else{
-		bool e1 = checkBbsah(bbox->child1);
-		bool e2 = checkBbsah(bbox->child2);
+		bool e1 = checkBbsahmix(bbox->child1);
+		bool e2 = checkBbsahmix(bbox->child2);
 		isValid = (e1 && e2);
 	}
 	return isValid;
 }
 
 void
-	BVH4DSAH::build(Objects * objs)
+	BVH4DSAHMIX::build(Objects * objs)
 {
 	m_objects = objs;
 	root = new BBox();
@@ -153,14 +162,14 @@ void
 	printf("[-]  Total Time splits: %d\n", tSplits);
 	if(true){ // Check 4D BVH for errors?
 		printf("[-]   Checking for errors...\n");
-		if(checkBbsah(root))
+		if(checkBbsahmix(root))
 			printf("[-]   Success, 4D BVH is valid!\n");
 		else
 			printf("[-]   ERROR! 4D BVH Contains invalid nodes!\n");
 	}
 }
 
-bool BVH4DSAH::intersectBVH4D(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, float tMax) const
+bool BVH4DSAHMIX::intersectBVH4D(BBox* bbox, HitInfo& minHit, const Ray& ray, float tMin, float tMax) const
 {
 	bool hit = false;
 	HitInfo tempMinHit;
@@ -185,14 +194,14 @@ bool BVH4DSAH::intersectBVH4D(BBox* bbox, HitInfo& minHit, const Ray& ray, float
 }
 
 bool
-	BVH4DSAH::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
+	BVH4DSAHMIX::intersect(HitInfo& minHit, const Ray& ray, float tMin, float tMax)
 {
 	minHit.t = MIRO_TMAX;
 	return intersectBVH4D(root, minHit, ray, tMin, tMax);
 }
 
 void 
-	BVH4DSAH::draw() {
+	BVH4DSAHMIX::draw() {
 		// Does not make sense in 4D
 		root->draw4D(true,0);
 }

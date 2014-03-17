@@ -1,5 +1,5 @@
-#ifndef CSE168_BVH4D_H_INCLUDED
-#define CSE168_BVH4D_H_INCLUDED
+#ifndef CSE168_BVH4DSAHMIX_H_INCLUDED
+#define CSE168_BVH4DSAHMIX_H_INCLUDED
 
 #include "Miro.h"
 #include "Object.h"
@@ -8,10 +8,10 @@
 #include "AccStructure.h"
 
 
-class BVH4D : public AccStructure
+class BVH4DSAHMIX : public AccStructure
 {
 public:
-	BVH4D(int tempSamples) : temporalSamples(tempSamples) { nBoxes = 0; nLeafs = 0; tSplits = 0; }
+	BVH4DSAHMIX(int tempSamples) : temporalSamples(tempSamples) { nBoxes = 0; nLeafs = 0; tSplits = 0; }
     virtual void build(Objects * objs);
     virtual bool intersect(HitInfo& result, const Ray& ray,
                    float tMin = 0.0f, float tMax = MIRO_TMAX);

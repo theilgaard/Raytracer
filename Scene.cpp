@@ -98,6 +98,12 @@ Scene::preCalc()
 		m_accStruct = bvh4dsah;
 		break;
 		}
+	case ACCSTRUCT_BVH4DSAHMIX:
+		{
+		BVH4DSAHMIX *bvh4dsahmix = new BVH4DSAHMIX(temporalSamples);
+		m_accStruct = bvh4dsahmix;
+		break;
+		}
 	case ACCSTRUCT_BVHREFIT:
 		{
 		BVHRefit *bvhrefit = new BVHRefit();
@@ -195,7 +201,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 			
 			int end = glutGet(GLUT_ELAPSED_TIME);
 			int est = ((end - start) / (j + 1)) * (img->height() - j - 1) * (t + 1) * temporalSamples;
-			printf("Time: %f \t | ", time);
+			printf("Time: %d/%d \t | ", t,temporalSamples-1);
 			printf("Rendering Progress: %.3f%% \r", (t  *img->height() + j) / (temporalSamples * float(img->height())) * 100.f);
 			//printf("Estimated time left: %i min and %i sec\r", est/60000, (est/1000) % 60);
 			fflush(stdout);
@@ -212,6 +218,8 @@ Scene::raytraceImage(Camera *cam, Image *img)
 		img->drawScanline(j);
 		glFinish();
 	}
+	memset(pixelResult,0,(img->height()*sizeof(Vector3))*(img->width()*sizeof(Vector3)));
+
 
     printf("Rendering Progress: 100.000%\n");
 
@@ -221,6 +229,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
     printf("Number of rays: %i\n", nrays);
     printf("Number of ray-box intersections: %i\n", boxints);
     printf("Number of ray-triangle intersections: %i\n", triangleints);
+	printf("---------------------------------------------\n");
     fflush(stdout);
 }
 
