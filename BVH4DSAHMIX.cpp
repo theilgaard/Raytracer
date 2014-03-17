@@ -16,7 +16,7 @@ struct objectCmp {
 void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 {
 	nBoxes++;
-	if (bbox->lastElement - bbox->firstElement  <= 3) {
+	if (bbox->lastElement - bbox->firstElement  <= 3 || (bbox->bounds4D[1].w - bbox->bounds4D[0].w) <= (1.0f/(temporalSamples))) {
 		bbox->isLeaf = true;
 		nLeafs++;
 	} else {
@@ -27,6 +27,7 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 		float minSplitCost = INFINITY;
 		float minSplitPos;
 		int minAxis;
+		float splitCost;
 		child1->m_objects = bbox->m_objects;
 		child2->m_objects = bbox->m_objects;
 		child1->firstElement = bbox->firstElement;
@@ -46,7 +47,7 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 				child2->firstElement = i + 1;
 				child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 				child2->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
-				float splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
+				splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
 					(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
 				if (splitCost < minSplitCost) {
 					minSplitCost = splitCost;
@@ -59,17 +60,15 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 		// Test time split
 		child1->firstElement = child2->firstElement = bbox->firstElement;
 		child1->lastElement = child2->lastElement = bbox->lastElement;
-		float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples*2, 0.1f);		// Time step resolution
+		float tStep = std::min((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples, 0.1f);		// Time step resolution
 		for(float i = bbox->bounds4D[0].w; i < bbox->bounds4D[1].w; i += tStep){
-			float timeSplit = i;
-			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, timeSplit);
-			child2->calcDimensions4D(bbox->m_objects, timeSplit, bbox->bounds4D[1].w);
-			float splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
+			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, i);
+			child2->calcDimensions4D(bbox->m_objects, i, bbox->bounds4D[1].w);
+			splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
 				(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
 			if (splitCost < minSplitCost) {
-				tSplits++;
 				bbox->isTimesplit = true;
-				minSplitPos = splitCost;
+				minSplitCost = splitCost;
 				minSplitPos = i;
 				minAxis = 3;
 			}
@@ -92,6 +91,10 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 			child1->m_objects = bbox->m_objects;
 			child2->m_objects = bbox->m_objects;
 		}else{
+			tSplits++;
+			printf("MinSplitPos: %f\n", minSplitPos);
+			child1->m_objects = new Objects();
+			child2->m_objects = new Objects();
 			//float timeSplit = (bbox->bounds4D[0].w + bbox->bounds4D[1].w)/2.0f;
 			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, minSplitPos);
 			child2->calcDimensions4D(bbox->m_objects, minSplitPos, bbox->bounds4D[1].w);
