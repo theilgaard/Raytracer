@@ -206,7 +206,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 			//printf("Estimated time left: %i min and %i sec\r", est/60000, (est/1000) % 60);
 			fflush(stdout);
 		}
-		openGL(cam); // Outcomment this for (slightly) added performance. 
+		//openGL(cam); // Outcomment this for (slightly) added performance. 
 	}
     int end = glutGet(GLUT_ELAPSED_TIME);
 

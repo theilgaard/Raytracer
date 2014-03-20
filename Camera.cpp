@@ -33,6 +33,12 @@ Camera::~Camera()
 
 }
 
+void
+Camera::printLocation(){
+	printf("Eye: %.3f, %.3f, %.3f\n", m_eye.x, m_eye.y, m_eye.z);
+	printf("ViewDir: %.3f, %.3f, %.3f\n", m_viewDir.x, m_viewDir.y, m_viewDir.z);
+}
+
 
 void
 Camera::click(Scene* pScene, Image* pImage)

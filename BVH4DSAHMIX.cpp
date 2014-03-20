@@ -47,7 +47,7 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 				child2->firstElement = i + 1;
 				child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 				child2->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
-				splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
+				splitCost = bbox->getbboxIsectCost() + (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
 					(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
 				if (splitCost < minSplitCost) {
 					minSplitCost = splitCost;
@@ -60,11 +60,11 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 		// Test time split
 		child1->firstElement = child2->firstElement = bbox->firstElement;
 		child1->lastElement = child2->lastElement = bbox->lastElement;
-		float tStep = std::min((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples, 0.1f);		// Time step resolution
+		float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples, 0.1f);		// Time step resolution
 		for(float i = bbox->bounds4D[0].w; i < bbox->bounds4D[1].w; i += tStep){
 			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, i);
 			child2->calcDimensions4D(bbox->m_objects, i, bbox->bounds4D[1].w);
-			splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
+			splitCost = bbox->getbboxIsectCost() + (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
 				(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
 			if (splitCost < minSplitCost) {
 				bbox->isTimesplit = true;
@@ -72,6 +72,13 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 				minSplitPos = i;
 				minAxis = 3;
 			}
+		}
+
+		// Should we even split?
+		if(minSplitCost > bbox->getbboxCost()){
+			bbox->isLeaf = true;
+			nLeafs++;
+			return;
 		}
 
 		// Set child box vars according to case.
@@ -88,8 +95,6 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 			child2->firstElement = minSplitPos + 1;
 			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 			child2->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
-			child1->m_objects = bbox->m_objects;
-			child2->m_objects = bbox->m_objects;
 		}else{
 			tSplits++;
 			printf("MinSplitPos: %f\n", minSplitPos);

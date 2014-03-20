@@ -4,8 +4,8 @@
 #include "Triangle.h"
 
 extern int boxints;
-const float BOXCOST = 6.0f;
-const float OBJECTCOST = 18.0f;
+const float BOXISECTCOST = 1.0f;
+const float OBJECTCOST = 225.0f;
 
 class BBox {
 public:
@@ -23,6 +23,7 @@ public:
 	float surfaceArea();
 	float surfaceArea4D();
 	float getbboxCost();
+	float getbboxIsectCost();
 	void draw(bool draw, int depth = -1);
 	void draw4D(bool draw, int depth = -1);
 	void print(std::string s = "");

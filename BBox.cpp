@@ -112,6 +112,10 @@ float BBox::getbboxCost() {
 	return OBJECTCOST*(lastElement - firstElement);
 }
 
+float BBox::getbboxIsectCost(){
+	return BOXISECTCOST;
+}
+
 void BBox::draw(bool draw, int depth){
 	float blue = 0.0;
 	if(depth != -1)

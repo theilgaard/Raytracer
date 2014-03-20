@@ -203,8 +203,8 @@ MiroWindow::keyboard(unsigned char key, int x, int y)
             g_camera->setEye(g_camera->eye() + m_scaleFact*g_camera->up());
         break;
 
-        case 'z':
-        case 'Z':
+        case 'e':
+        case 'E':
             g_camera->setEye(g_camera->eye() - m_scaleFact*g_camera->up());
         break;
 
@@ -223,6 +223,12 @@ MiroWindow::keyboard(unsigned char key, int x, int y)
             g_camera->setEye(g_camera->eye() + m_scaleFact*vRight);
             break;
         }
+
+		case 'c':
+		case 'C':
+		{
+			g_camera->printLocation();
+		}
         break;
 
         default:

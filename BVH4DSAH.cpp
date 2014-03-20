@@ -47,13 +47,20 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 				child2->firstElement = i + 1;
 				child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 				child2->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
-				float splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
+				float splitCost = bbox->getbboxIsectCost() + (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
 					(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
 				if (splitCost < minSplitCost) {
 					minSplitCost = splitCost;
 					minSplitPos = i;
 				}
 			}
+			// Should we even split?
+			if(minSplitCost > bbox->getbboxCost()){
+				bbox->isLeaf = true;
+				nLeafs++;
+				return;
+			}
+
 			child1->lastElement = minSplitPos;
 			child2->firstElement = minSplitPos + 1;
 			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
@@ -76,12 +83,19 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 				float timeSplit = i;
 				child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, timeSplit);
 				child2->calcDimensions4D(bbox->m_objects, timeSplit, bbox->bounds4D[1].w);
-				float splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
+				float splitCost = bbox->getbboxIsectCost() + (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
 					(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
 				if (splitCost < minTimesplitCost) {
 					minTimesplitCost = splitCost;
 					minTimeSplitPos = i;
 				}
+			}
+
+			// Should we even split?
+			if(minTimesplitCost > bbox->getbboxCost()){
+				bbox->isLeaf = true;
+				nLeafs++;
+				return;
 			}
 			//float timeSplit = (bbox->bounds4D[0].w + bbox->bounds4D[1].w)/2.0f;
 			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, minTimeSplitPos);

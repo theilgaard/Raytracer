@@ -47,12 +47,18 @@ void BVH4D::divide(BBox* bbox, int depth)
 				child2->firstElement = i + 1;
 				child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 				child2->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
-				float splitCost = (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
+				float splitCost = bbox->getbboxIsectCost() + (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
 					(child2->surfaceArea4D() / bbox->surfaceArea4D())*child2->getbboxCost();
 				if (splitCost < minSplitCost) {
 					minSplitCost = splitCost;
 					minSplitPos = i;
 				}
+			}
+			// Should we even split?
+			if(minSplitPos > bbox->getbboxCost()){
+				bbox->isLeaf = true;
+				nLeafs++;
+				return;
 			}
 			child1->lastElement = minSplitPos;
 			child2->firstElement = minSplitPos + 1;
