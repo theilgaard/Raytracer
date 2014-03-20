@@ -81,7 +81,7 @@ Vector3	ShadingModel::shade(const Ray& ray, const HitInfo& hit, const Scene& sce
 			refrDir = n * ray.d + (n * cosI - cosT) * N;
 			refrDir.normalize();
 			// Trace the ray
-			Ray refrR(hit.P, refrDir, eta);
+			Ray refrR(hit.P, refrDir, eta, ray.time);
 			HitInfo hitInfo;
 			if (scene.trace(hitInfo, refrR, 0.00029)){
 				Vector3 color = hitInfo.material->shade(refrR, hitInfo, scene, bounce + 1, pMap);

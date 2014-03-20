@@ -16,12 +16,12 @@ public:
 	Vector3 centroid;
 
 	
-	void setFutureMatrix(Matrix4x4* m) { m_fm = m; }
     void setMaterial(ShadingModel* m) {m_material = m;}
 
     virtual void renderGL() {}
     virtual void preCalc() {}
-
+	
+	virtual void interpolate(float time) {}
 
     virtual bool intersect(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX) = 0;
@@ -30,7 +30,7 @@ public:
 
 protected:
     ShadingModel* m_material;
-	Matrix4x4* m_fm;
+	virtual void reCalc() {}
 };
 
 typedef std::vector<Object*> Objects;

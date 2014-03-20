@@ -306,16 +306,94 @@ void makeAnimatedSphere(){
 	TriangleMesh * object = new TriangleMesh;
 	fm = &translate(0.0, 4.0, 0.0);
 	object->setDefaultMaterial(lightblue);
-	object->load("objects/sphere_super_smooth.obj");
-	g_scene->addMesh(object, fm);
 
-	/*TriangleMesh * object2 = new TriangleMesh;
-	Matrix4x4 mt = translate(0.0, 4.0, 0.0);
+	TriangleMesh * object2 = new TriangleMesh;
 	object2->setDefaultMaterial(lightblue);
-	object2->load("objects/sphere_super_smooth.obj", mt);
-	g_scene->addMesh(object2);*/
+	int sceneSelector = 6;
 
+	switch(sceneSelector){
+	case 0:
+		object->load("objects/cubeRot.obj");	// 192 triangles
+		object2->load("objects/cubeRot2.obj");
+		g_camera->setEye(Vector3(-10.834f, 10.391f, -3.829f));
+		g_camera->setViewDir(Vector3(0.841f, -0.434f, 0.323f));
+		break;
+	case 1:
+		object->load("objects/sphere_super_smooth.obj"); // 1920 triangles
+		object2->load("objects/sphere_super_smooth2.obj");
+		g_camera->setEye(Vector3(-10.013f, 8.035f, -0.220f));
+		g_camera->setViewDir(Vector3(0.907f, -0.421f, 0.032f));
+		break;
+	case 2:
+		object->load("objects/wooddoll_00tri.obj");	// 5378 triangles
+		object2->load("objects/wooddoll_03tri.obj");
+		g_camera->setEye(Vector3(-0.745f, 0.439f, 0.051f));
+		g_camera->setViewDir(Vector3(0.967f, -0.254f, -0.033f));
+		break;
+	case 3:
+		object->load("objects/hand_00tri.obj"); // 15855 triangles
+		object2->load("objects/hand_03tri.obj");
+		g_camera->setEye(Vector3(-0.734f, 0.439f, -0.522f));
+		g_camera->setViewDir(Vector3(0.895f, -0.086f, 0.437f));
+		break;
+	case 4:
+		object->load("objects/24cell000tri.obj");	// 122800 triangles
+		object2->load("objects/24cell008tri.obj");
+		g_camera->setEye(Vector3(-10.134f, 1.342f, -5.112f));
+		g_camera->setViewDir(Vector3(0.894f, -0.103f, 0.436f));
+		break;
+	case 5:
+		object->load("objects/ben_00tri.obj");		// 78,000 triangles
+		object2->load("objects/ben_10tri.obj");
+		g_camera->setEye(Vector3(-0.826f, 0.630f, 0.153f));
+		g_camera->setViewDir(Vector3(0.938f, -0.321f, -0.132f));
+		break;
+	case 6:
+		object->load("objects/marbles025tri.obj");	// 8,800 triangles
+		object2->load("objects/marbles032tri.obj");
+		g_camera->setEye(Vector3(-0.574f, 0.524f, 0.106f));
+		g_camera->setViewDir(Vector3(0.906f, -0.403f, -0.128f));
+		break;
+	case 7:
+		object->load("objects/Toasters004tri.obj");	// 11,100 triangles
+		object2->load("objects/Toasters014tri.obj");
+		g_camera->setEye(Vector3(-0.317f, 0.395f, -0.944f));
+		g_camera->setViewDir(Vector3(0.319f, -0.368f, 0.873f));
+		break;
+	case 8:
+	{
+		object->load("objects/f160tri.obj");	// 172,200 triangles
+		object2->load("objects/f170tri.obj");
+		g_camera->setEye(Vector3(-0.043f, 0.177f, 0.309f));
+		g_camera->setViewDir(Vector3(0.164f, -0.311f, -0.936f));
+		Vector3 lightPos12 = Vector3(0, 8, 2);
+		g_scene->setLightPos(lightPos12);
+		// Create 2nd light source
+		PointLight * light2 = new PointLight;
+		light2->setPosition(lightPos12);
+		light2->setColor(Vector3(1, 1, 1));
+		light2->setWattage(50);
+		g_scene->addLight(light2);
+		break;
+	}
+	case 9:
+		object->load("objects/tesseract000tri.obj");	// 172,100 triangles
+		object2->load("objects/tesseract004tri.obj");
+		g_camera->setEye(Vector3(-0.732f, 0.874f, -2.079f));
+		g_camera->setViewDir(Vector3(0.319f, -0.368f, 0.873f));
+		break;
+	case 10:
+		object->load("objects/dragon00tri.obj");		// 252,200 triangles
+		object2->load("objects/dragon05tri.obj");
+		g_camera->setEye(Vector3(-0.079f, 0.141f, -0.228f));
+		g_camera->setViewDir(Vector3(0.274f, -0.143f, 0.951f));
+		break;
+	default:
+		break;
+	}
 
+	g_scene->addMesh(object, object2);
+	
 	// Floor triangle
 	TriangleMesh * floor = new TriangleMesh;
 	floor->createSingleTriangle();
@@ -325,7 +403,7 @@ void makeAnimatedSphere(){
 	floor->setN1(Vector3(0, 1, 0));
 	floor->setN2(Vector3(0, 1, 0));
 	floor->setN3(Vector3(0, 1, 0));
-	Triangle* t = new Triangle;
+	Triangle* t = new Triangle();
 
 	t->setIndex(0);
 	t->setMesh(floor);

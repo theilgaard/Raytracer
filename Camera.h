@@ -33,6 +33,7 @@ public:
     inline void setBGColor(float x, float y, float z);
     inline void setBGColor(const Vector3& color);
     inline void setFOV(float fov) {m_fov = fov;}
+	void printLocation();
 
     inline float fov() const                {return m_fov;}
     inline const Vector3 & viewDir() const  {return m_viewDir;}

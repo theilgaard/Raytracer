@@ -79,6 +79,10 @@
     <ClCompile Include="BBox.cpp" />
     <ClCompile Include="BLPatch.cpp" />
     <ClCompile Include="BVH.cpp" />
+    <ClCompile Include="BVH4D.cpp" />
+    <ClCompile Include="BVH4DSAH.cpp" />
+    <ClCompile Include="BVH4DSAHMIX.cpp" />
+    <ClCompile Include="BVHRefit.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CircleLight.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -94,10 +98,15 @@
     <ClCompile Include="TriangleMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AccStructure.h" />
     <ClInclude Include="AreaLight.h" />
     <ClInclude Include="BBox.h" />
     <ClInclude Include="BLPatch.h" />
     <ClInclude Include="BVH.h" />
+    <ClInclude Include="BVH4D.h" />
+    <ClInclude Include="BVH4DSAH.h" />
+    <ClInclude Include="BVH4DSAHMIX.h" />
+    <ClInclude Include="BVHRefit.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CircleLight.h" />
     <ClInclude Include="Console.h" />

@@ -5,9 +5,14 @@
 #include <iostream>
 #include "Miro.h"
 #include "Object.h"
-#include "BVH.h"
 #include "PointLight.h"
 #include "RectangleLight.h"
+#include "AccStructure.h"
+#include "BVH.h"
+#include "BVH4D.h"
+#include "BVH4DSAH.h"
+#include "BVH4DSAHMIX.h"
+#include "BVHRefit.h"
 
 class Camera;
 class Image;
@@ -23,6 +28,17 @@ public:
 
 		return instance;
 	}
+
+	enum
+    {
+        ACCSTRUCT_BVH   = 0,
+        ACCSTRUCT_BVHREFIT = 1,
+		ACCSTRUCT_BVHREFITFULL = 2,
+		ACCSTRUCT_BVH4D = 3,
+		ACCSTRUCT_BVH4DSAH = 4,
+		ACCSTRUCT_BVH4DSAHMIX = 5
+    };
+
 	void addObject(Object* pObj)        { m_objects.push_back(pObj); }
     const Objects* objects() const      {return &m_objects;}
 
@@ -38,18 +54,28 @@ public:
     bool trace(HitInfo& minHit, const Ray& ray,
                float tMin = 0.0f, float tMax = MIRO_TMAX) const;
     void setLightPos(Vector3 lightPosition){ lightPos = lightPosition;}
-    void addMesh(TriangleMesh* mesh, Matrix4x4* futureMatrix = NULL);
+    void addMesh(TriangleMesh* mesh);
+	void addMesh(TriangleMesh* mesh, TriangleMesh* mesh2); // mesh at start time and mesh2 at stop time
 protected:
 	Objects m_objects;
-	std::map<Object*,Object*> animations; 
-    BVH m_bvh;
+    AccStructure *m_accStruct;
+	int m_accStruct_type;
     PointLights m_lights;
     RectangleLights recLights;
     PhotonMap* pMap;
     bool preCalcDone;
     Vector3 lightPos;
+	Vector3 pixelResult[4000][3000];
+	int samples;
+	int temporalSamples;
 private:
-	Scene() { preCalcDone = false; };                   // Constructor? (the {} brackets) are needed here.
+	Scene() { 
+		m_accStruct_type = ACCSTRUCT_BVHREFIT;
+		m_accStruct = NULL;
+		preCalcDone = false; 
+		samples = 1;
+		temporalSamples = 16;
+	};                   // Constructor? (the {} brackets) are needed here.
     // Dont forget to declare these two. You want to make sure they
     // are unaccessable otherwise you may accidently get copies of
     // your singleton appearing.

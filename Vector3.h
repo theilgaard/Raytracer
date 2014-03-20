@@ -173,7 +173,8 @@ public:
         Returns the geometric length of the vector.
     */
     float length() const {return sqrtf(length2());}
-    
+
+
     //! Normalizes the vector and return its length.
     /*!
         Scales each component of the vector in order to get unit
@@ -244,6 +245,12 @@ dot(const Vector3 & a, const Vector3 & b)
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
+//! The linear interpolated point
+inline Vector3
+lerp(const Vector3 &p0, const Vector3 &p1, float t){
+	const Vector3 v = p1 - p0;
+	return p0 + t*v;
+}
 
 //! The cross product of two Vec3s.
 inline Vector3

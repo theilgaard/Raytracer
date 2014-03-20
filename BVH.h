@@ -5,20 +5,21 @@
 #include "Object.h"
 #include <string>
 #include "BBox.h"
+#include "AccStructure.h"
 
 
-class BVH
+class BVH : public AccStructure
 {
 public:
-	BVH() { nBoxes = 0; nLeafs = 0; }
-    void build(Objects * objs);
-    bool intersect(HitInfo& result, const Ray& ray,
-                   float tMin = 0.0f, float tMax = MIRO_TMAX) const;
-	void draw();
-    
-    int nBoxes;
-	int nLeafs;
+	BVH() { nBoxes = 0; nLeafs = 0, time = 0.0f; }
+    virtual void build(Objects * objs);
+    virtual bool intersect(HitInfo& result, const Ray& ray,
+                   float tMin = 0.0f, float tMax = MIRO_TMAX);
+	virtual void draw();
 protected:
+	float time;
+	int nBoxes;
+	int nLeafs;
 	BBox *root;
 	Objects *m_objects;
 	void divide(BBox* bbox, int depth);

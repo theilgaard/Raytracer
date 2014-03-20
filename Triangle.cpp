@@ -6,13 +6,21 @@
 #include <iostream>
 using namespace std;
 
-Triangle::Triangle(TriangleMesh * m, unsigned int i, Matrix4x4* fm) :
+Triangle::Triangle(TriangleMesh * m, unsigned int i) :
 	m_mesh(m), m_index(i), v0(Vector3(0.0f)), v1(Vector3(0.0f)), v2(Vector3(0.0f)),
 	n0(Vector3(0.0f)), n1(Vector3(0.0f)), n2(Vector3(0.0f))
 {
-	m_fm = fm;
+
 }
 
+Triangle::Triangle(TriangleMesh * m, TriangleMesh * m2, unsigned int i) :
+	m_mesh(m), m_index(i), v0(Vector3(0.0f)), v1(Vector3(0.0f)), v2(Vector3(0.0f)),
+	n0(Vector3(0.0f)), n1(Vector3(0.0f)), n2(Vector3(0.0f)),
+	m_mesh2(m2), vf0(Vector3(0.0f)), vf1(Vector3(0.0f)), vf2(Vector3(0.0f)),
+	nf0(Vector3(0.0f)), nf1(Vector3(0.0f)), nf2(Vector3(0.0f))
+{
+
+}
 
 Triangle::~Triangle()
 {
@@ -28,31 +36,64 @@ Triangle::renderGL()
     const Vector3 & v1 = m_mesh->vertices()[ti3.y]; //vertex b of triangle
     const Vector3 & v2 = m_mesh->vertices()[ti3.z]; //vertex c of triangle
 
-    glBegin(GL_TRIANGLES);
+	glBegin(GL_TRIANGLES);
         glVertex3f(v0.x, v0.y, v0.z);
         glVertex3f(v1.x, v1.y, v1.z);
         glVertex3f(v2.x, v2.y, v2.z);
     glEnd();
 
-	glBegin(GL_TRIANGLES);
+	if(m_mesh2 != 0){
+		const Vector3 & vf0 = m_mesh2->vertices()[ti3_2.x]; //vertex a of triangle
+		const Vector3 & vf1 = m_mesh2->vertices()[ti3_2.y]; //vertex b of triangle
+		const Vector3 & vf2 = m_mesh2->vertices()[ti3_2.z]; //vertex c of triangle
+
+		/*float t = 0.5f;
+		glColor3f(1.0,1.0,0.0);
+		glBegin(GL_TRIANGLES);
+			glVertex3f(lerp(v0,vf0,t).x, lerp(v0,vf0,t).y, lerp(v0,vf0,t).z);
+			glVertex3f(lerp(v1,vf1,t).x, lerp(v1,vf1,t).y, lerp(v1,vf1,t).z);
+			glVertex3f(lerp(v2,vf2,t).x, lerp(v2,vf2,t).y, lerp(v2,vf2,t).z);
+		glEnd();*/
+
 		glColor3f(0.0,1.0,0.0);
-        glVertex3f(vf0.x, vf0.y, vf0.z);
-        glVertex3f(vf1.x, vf1.y, vf1.z);
-        glVertex3f(vf2.x, vf2.y, vf2.z);
-    glEnd();
+		glBegin(GL_TRIANGLES);
+			glVertex3f(vf0.x, vf0.y, vf0.z);
+			glVertex3f(vf1.x, vf1.y, vf1.z);
+			glVertex3f(vf2.x, vf2.y, vf2.z);
+		glEnd();
+	}
 }
 
+// Expensive! 
+void
+Triangle::interpolate(float time){
+	if(m_mesh2 != 0){
+		if(time != prevTime){
+			vp0 = lerp(v0,vf0,time);
+			vp1 = lerp(v1,vf1,time);
+			vp2 = lerp(v2,vf2,time);
 
+			// Should the normals be interpolated as well?
+			np0 = n0;
+			np1 = n1;
+			np2 = n2;
+			
+			reCalc(); 
+			prevTime = time;
+		}
+	}
+}
 
 bool
 Triangle::intersect(HitInfo& result, const Ray& r, float tMin, float tMax)
 {
 	triangleints++;
-	
-	// Is the object motion blurred?
-	if(m_fm != NULL){
-		return intersectAnimated(result, r, tMin, tMax);
-	}
+
+	// Intersect motionblur.
+	//if(encapsulateBoth && (m_mesh2 != 0)){
+	//	interpolate(r.time);
+	//	reCalc();
+    //}
 
 	bool positiveSign;
 	float V_a =
@@ -82,59 +123,14 @@ Triangle::intersect(HitInfo& result, const Ray& r, float tMin, float tMax)
 	float beta = V_b*invSignSum;
 	float gamma = V_c*invSignSum;
 
-	result.P = alpha*v0 + beta*v1 + gamma*v2; // Hitpoint on triangle.
+	result.P = alpha*vp0 + beta*vp1 + gamma*vp2; // Hitpoint on triangle.
 	float t = dot((result.P - r.o), r.d);
 	if (t < tMin || t > tMax)
 		return false;
 
 	result.t = t;
 	result.P = r.o + t * r.d; //alpha * v0 + beta * v1 + gamma * v2;
-	result.N = alpha * n0 + beta * n1 + gamma * n2; //shading normal
-	result.N.normalize();
-	result.material = this->m_material;
-	//printf("%p\n", result.material);
-	//fflush(stdout);
-    return true;
-}
-
-bool
-Triangle::intersectAnimated(HitInfo& result, const Ray& r, float tMin, float tMax)
-{
-	// Interpolate the triangle to it's time position.
-	Matrix4x4 m;
-	if(r.time != 0.0)
-		m = (*m_fm) * r.time;
-		
-	Vector3 i = m * v0;
-	Vector3 j = m * v1;
-	Vector3 k = m * v2;
-
-	Vector3 in = m * n0;
-	Vector3 jn = m * n1;
-	Vector3 kn = m * n2;
-
-	const Vector3 n =  cross((j - i),(k - i)); //geometric normal of plane/triangle
-
-	const float t = dot(n,(r.o - i)) / dot(n,-r.d);
-
-//	if (t > tMin || t < 0 || t > tMax){
-//		//cout << " false" << endl;
-//		return false;
-//	}
-	if (t < tMin || t > tMax){
-			return false;
-	}
-
-	const float beta = dot(cross(r.o - i, k - i), -r.d) / dot(n,-r.d);
-	const float gamma = dot(cross(j - i, r.o - i), -r.d) / dot(n,-r.d);
-	const float alpha = 1 - beta - gamma;
-	if(beta < 0 || gamma < 0 || alpha < 0 || beta > 1 || gamma > 1 || alpha > 1){
-		//hitpoint is outside triangle
-		return false;
-	}
-	result.t = t;
-	result.P = r.o + t * r.d; //alpha * i + beta * j + gamma * k;
-	result.N = alpha * in + beta * jn + gamma * kn; //shading normal
+	result.N = alpha * np0 + beta * np1 + gamma * np2; //shading normal
 	result.N.normalize();
 	result.material = this->m_material;
 	//printf("%p\n", result.material);
@@ -143,19 +139,19 @@ Triangle::intersectAnimated(HitInfo& result, const Ray& r, float tMin, float tMa
 }
 
 void Triangle::preCalc(){
+	if(m_mesh2 != 0){
+		ti3_2 = m_mesh2->vIndices()[m_index];
+		ti3n_2 = m_mesh2->nIndices()[m_index];
+		vf0 = m_mesh2->vertices()[ti3_2.x]; //vertex a of future triangle
+		vf1 = m_mesh2->vertices()[ti3_2.y]; //vertex b of future triangle
+		vf2 = m_mesh2->vertices()[ti3_2.z]; //vertex c of future triangle
+
+		nf0 = m_mesh2->normals()[ti3n_2.x]; //normals a of future triangle
+		nf1 = m_mesh2->normals()[ti3n_2.y]; //normals b of future triangle
+		nf2 = m_mesh2->normals()[ti3n_2.z]; //normals c of future triangle
+	}
 	ti3 = m_mesh->vIndices()[m_index];
 	ti3n = m_mesh->nIndices()[m_index];
-
-	if(m_fm != NULL){
-		vf0 = m_fm * m_mesh->vertices()[ti3.x];
-		vf1 = m_fm * m_mesh->vertices()[ti3.y];
-		vf2 = m_fm * m_mesh->vertices()[ti3.z];
-
-		nf0 = m_fm * m_mesh->vertices()[ti3n.x];
-		nf1 = m_fm * m_mesh->vertices()[ti3n.y];
-		nf2 = m_fm * m_mesh->vertices()[ti3n.z];
-	}
-
 	v0 = m_mesh->vertices()[ti3.x]; //vertex a of triangle
 	v1 = m_mesh->vertices()[ti3.y]; //vertex b of triangle
 	v2 = m_mesh->vertices()[ti3.z]; //vertex c of triangle
@@ -167,28 +163,28 @@ void Triangle::preCalc(){
 	n = cross((v1 - v0), (v2 - v0)); //geometric normal of plane/triangle
 
 	max = Vector3(std::max(v0.x, std::max(v1.x, v2.x)),
-					std::max(v0.y, std::max(v1.y, v2.y)),
-					std::max(v0.z, std::max(v1.z, v2.z)));
+				  std::max(v0.y, std::max(v1.y, v2.y)),
+				  std::max(v0.z, std::max(v1.z, v2.z)));
 
 	min = Vector3(std::min(v0.x, std::min(v1.x, v2.x)),
-					std::min(v0.y, std::min(v1.y, v2.y)),
-					std::min(v0.z, std::min(v1.z, v2.z)));
-	
-	// Calculate the max and min, including the transformed triangle.
-	if(m_fm != NULL){
-		Vector3 fmax = Vector3(std::max(vf0.x, std::max(vf1.x, vf2.x)),
-							std::max(vf0.y, std::max(vf1.y, vf2.y)),
-							std::max(vf0.z, std::max(vf1.z, vf2.z)));
-		Vector3 fmin = Vector3(std::min(vf0.x, std::min(vf1.x, vf2.x)),
-							std::min(vf0.y, std::min(vf1.y, vf2.y)),
-							std::min(vf0.z, std::min(vf1.z, vf2.z)));
-		max.x = std::max(max.x, fmax.x);
-		max.y = std::max(max.y, fmax.y);
-		max.z = std::max(max.z, fmax.z);
-		min.x = std::min(min.x, fmin.x);
-		min.y = std::min(min.y, fmin.y);
-		min.z = std::min(min.z, fmin.z);
-	}
+				  std::min(v0.y, std::min(v1.y, v2.y)),
+				  std::min(v0.z, std::min(v1.z, v2.z)));
+
+	if(encapsulateBoth == true && (m_mesh2 != 0)){
+        Vector3 fmax = Vector3(std::max(vf0.x, std::max(vf1.x, vf2.x)),
+                                                std::max(vf0.y, std::max(vf1.y, vf2.y)),
+                                                std::max(vf0.z, std::max(vf1.z, vf2.z)));
+        Vector3 fmin = Vector3(std::min(vf0.x, std::min(vf1.x, vf2.x)),
+                                                std::min(vf0.y, std::min(vf1.y, vf2.y)),
+                                                std::min(vf0.z, std::min(vf1.z, vf2.z)));
+        max.x = std::max(max.x, fmax.x);
+        max.y = std::max(max.y, fmax.y);
+        max.z = std::max(max.z, fmax.z);
+        min.x = std::min(min.x, fmin.x);
+        min.y = std::min(min.y, fmin.y);
+        min.z = std::min(min.z, fmin.z);
+    }
+
 	//center of the bounding box:
 	centroid = Vector3((max.x + min.x) / 2, (max.y + min.y) / 2, (max.z + min.z) / 2);
 
@@ -205,4 +201,42 @@ void Triangle::preCalc(){
 	k_cy = Vector3(v0.z*v1.x - v0.x*v1.z, v0.x - v1.x, v1.z - v0.z)*(-1.0f / 6.0f);
 	k_cz = Vector3(v0.x*v1.y - v0.y*v1.x, v0.y - v1.y, v1.x - v0.x)*(-1.0f / 6.0f);
 
+	vp0 = v0;
+	vp1 = v1;
+	vp2 = v2;
+
+	np0 = n0;
+	np1 = n1;
+	np2 = n2;
+}
+
+void Triangle::reCalc(){
+	if(m_mesh2 != 0){
+	n = cross((vp1 - vp0), (vp2 - vp0)); //geometric normal of plane/triangle
+
+	max = Vector3(std::max(vp0.x, std::max(vp1.x, vp2.x)),
+				  std::max(vp0.y, std::max(vp1.y, vp2.y)),
+				  std::max(vp0.z, std::max(vp1.z, vp2.z)));
+
+	min = Vector3(std::min(vp0.x, std::min(vp1.x, vp2.x)),
+				  std::min(vp0.y, std::min(vp1.y, vp2.y)),
+				  std::min(vp0.z, std::min(vp1.z, vp2.z)));
+
+
+	//center of the bounding box:
+	centroid = Vector3((max.x + min.x) / 2, (max.y + min.y) / 2, (max.z + min.z) / 2);
+	
+	// constants for doing ray/triangle intersection with signed volumes
+	k_ax = Vector3(vp1.y*vp2.z - vp1.z*vp2.y, vp1.z - vp2.z, vp2.y - vp1.y)*(-1.0f / 6.0f);
+	k_ay = Vector3(vp1.z*vp2.x - vp1.x*vp2.z, vp1.x - vp2.x, vp2.z - vp1.z)*(-1.0f / 6.0f);
+	k_az = Vector3(vp1.x*vp2.y - vp1.y*vp2.x, vp1.y - vp2.y, vp2.x - vp1.x)*(-1.0f / 6.0f);
+
+	k_bx = Vector3(vp2.y*vp0.z - vp2.z*vp0.y, vp2.z - vp0.z, vp0.y - vp2.y)*(-1.0f / 6.0f);
+	k_by = Vector3(vp2.z*vp0.x - vp2.x*vp0.z, vp2.x - vp0.x, vp0.z - vp2.z)*(-1.0f / 6.0f);
+	k_bz = Vector3(vp2.x*vp0.y - vp2.y*vp0.x, vp2.y - vp0.y, vp0.x - vp2.x)*(-1.0f / 6.0f);
+
+	k_cx = Vector3(vp0.y*vp1.z - vp0.z*vp1.y, vp0.z - vp1.z, vp1.y - vp0.y)*(-1.0f / 6.0f);
+	k_cy = Vector3(vp0.z*vp1.x - vp0.x*vp1.z, vp0.x - vp1.x, vp1.z - vp0.z)*(-1.0f / 6.0f);
+	k_cz = Vector3(vp0.x*vp1.y - vp0.y*vp1.x, vp0.y - vp1.y, vp1.x - vp0.x)*(-1.0f / 6.0f);
+	}
 }

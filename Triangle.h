@@ -13,15 +13,22 @@ extern int triangleints;
 class Triangle : public Object
 {
 public:
-	Triangle(TriangleMesh * m = 0, unsigned int i = 0, Matrix4x4* fm = NULL);
+	Triangle() : m_mesh(0),	m_mesh2(0), v0(Vector3(0.0f)), v1(Vector3(0.0f)), v2(Vector3(0.0f)),
+		n0(Vector3(0.0f)), n1(Vector3(0.0f)), n2(Vector3(0.0f)) {};
+	Triangle(TriangleMesh * m, unsigned int i = 0);
+    Triangle(TriangleMesh * m, TriangleMesh * m2 = 0, unsigned int i = 0);
     virtual ~Triangle();
 
     void setIndex(unsigned int i) {m_index = i;}
     void setMesh(TriangleMesh* m) {m_mesh = m;}
+	void setMesh2(TriangleMesh* m) {m_mesh2 = m;}
+	void setEncapsulateBoth(bool v) {encapsulateBoth = v;}
 
 	TriangleMesh* getMesh() { return m_mesh; }
+	TriangleMesh* getMesh2() { return m_mesh2; }
 
     virtual void renderGL();
+	virtual void interpolate(float time);
     virtual bool intersect(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX);
 	virtual bool intersectAnimated(HitInfo& result, const Ray& ray,
@@ -30,10 +37,15 @@ public:
 protected:
 	TriangleMesh::TupleI3 ti3;
 	TriangleMesh::TupleI3 ti3n;
+	TriangleMesh::TupleI3 ti3_2;
+	TriangleMesh::TupleI3 ti3n_2;
 	Vector3 v0, v1, v2,
 			n0, n1, n2,
 			vf0, vf1, vf2,
-			nf0, nf1, nf2;
+			nf0, nf1, nf2,
+			vp0, vp1, vp2,
+			np0, np1, np2;
+	float prevTime;
 	Vector3 n;
 	Vector3 k_ax;
 	Vector3 k_ay;
@@ -45,7 +57,10 @@ protected:
 	Vector3 k_cy;
 	Vector3 k_cz;
     TriangleMesh* m_mesh;
+	TriangleMesh* m_mesh2;
+	bool encapsulateBoth;
     unsigned int m_index;
+	virtual void reCalc();
 };
 
 #endif // CSE168_TRIANGLE_H_INCLUDED
