@@ -5,6 +5,7 @@
 #include <algorithm>
 
 
+
 struct objectCmp {
 	int axis;
 	bool operator() (Object* obj1, Object* obj2)
@@ -12,6 +13,8 @@ struct objectCmp {
 		return obj1->centroid[axis] < obj2->centroid[axis];
 	}
 } cmp4dsah;
+
+
 
 void BVH4DSAH::divide(BBox* bbox, int depth)
 {
@@ -78,7 +81,8 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 			child1->lastElement = child2->lastElement = bbox->lastElement;
 			float minTimesplitCost = INFINITY;
 			float minTimeSplitPos;
-			float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples*2, 0.1f);
+			//float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples, 0.1f);
+			float tStep = (bbox->bounds4D[1].w - bbox->bounds4D[0].w)/10;
 			for(float i = bbox->bounds4D[0].w; i < bbox->bounds4D[1].w; i += tStep){
 				float timeSplit = i;
 				child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, timeSplit);
@@ -92,7 +96,7 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 			}
 
 			// Should we even split?
-			if(minTimesplitCost > bbox->getbboxCost()){
+			if(minTimesplitCost > bbox->getbboxCost() && (bbox->lastElement - bbox->firstElement) < 5){
 				bbox->isLeaf = true;
 				nLeafs++;
 				return;
@@ -107,9 +111,14 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 			for (int i = child2->firstElement; i <= child2->lastElement; ++i) {
 				child2->m_objects->push_back((*bbox->m_objects)[i]);
 			}
+			dupPointers += (bbox->lastElement - bbox->firstElement)*2;
 			// Make sure the first and last element now point to the start and end of their lists.
 			child1->firstElement = child2->firstElement = 0;
 			child1->lastElement = child2->lastElement = child1->m_objects->size()-1;
+
+			// Save timesplit position for analysis.
+			tssplitsFile << (bbox->bounds4D[1].w+bbox->bounds4D[0].w)/2 << ",";
+			tssplitsFile << minTimeSplitPos << "\n";
 		}
 		child1->parent = bbox;
 		child2->parent = bbox;
@@ -151,6 +160,7 @@ bool checkBbsah(BBox *bbox){
 void
 	BVH4DSAH::build(Objects * objs)
 {
+	tssplitsFile.open("C:\\timeSplitFile.txt", std::ios::trunc);
 	m_objects = objs;
 	root = new BBox();
 	root->parent = 0;
@@ -161,10 +171,11 @@ void
 
 	divide(root, 0);
 
-
+	tssplitsFile.close();
 	printf("[-]  Total Bboxes: %d\n", nBoxes);
 	printf("[-]  Total Leafs: %d\n", nLeafs);
 	printf("[-]  Total Time splits: %d\n", tSplits);
+	printf("[-]  Number of duplicate pointers: %d\n", dupPointers);
 	if(true){ // Check 4D BVH for errors?
 		printf("[-]   Checking for errors...\n");
 		if(checkBbsah(root))

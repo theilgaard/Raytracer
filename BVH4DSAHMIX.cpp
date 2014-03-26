@@ -60,8 +60,9 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 		// Test time split
 		child1->firstElement = child2->firstElement = bbox->firstElement;
 		child1->lastElement = child2->lastElement = bbox->lastElement;
-		float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples, 0.1f);		// Time step resolution
-		for(float i = bbox->bounds4D[0].w; i < bbox->bounds4D[1].w; i += tStep){
+		//float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples, 0.1f);
+		float tStep = (bbox->bounds4D[1].w - bbox->bounds4D[0].w)/5;
+		for(float i = bbox->bounds4D[0].w+tStep; i < bbox->bounds4D[1].w; i += tStep){
 			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, i);
 			child2->calcDimensions4D(bbox->m_objects, i, bbox->bounds4D[1].w);
 			splitCost = bbox->getbboxIsectCost() + (child1->surfaceArea4D() / bbox->surfaceArea4D())*child1->getbboxCost() +
@@ -75,7 +76,7 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 		}
 
 		// Should we even split?
-		if(minSplitCost > bbox->getbboxCost()){
+		if(minSplitCost > bbox->getbboxCost() && (bbox->lastElement-bbox->firstElement) < 5){
 			bbox->isLeaf = true;
 			nLeafs++;
 			return;
@@ -97,7 +98,7 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 			child2->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, bbox->bounds4D[1].w);
 		}else{
 			tSplits++;
-			printf("MinSplitPos: %f\n", minSplitPos);
+			//printf("MinSplitPos: %f\n", minSplitPos);
 			child1->m_objects = new Objects();
 			child2->m_objects = new Objects();
 			//float timeSplit = (bbox->bounds4D[0].w + bbox->bounds4D[1].w)/2.0f;
@@ -110,9 +111,14 @@ void BVH4DSAHMIX::divide(BBox* bbox, int depth)
 			for (int i = child2->firstElement; i <= child2->lastElement; ++i) {
 				child2->m_objects->push_back((*bbox->m_objects)[i]);
 			}
+			dupPointers += (bbox->lastElement - bbox->firstElement)*2;
 			// Make sure the first and last element now point to the start and end of their lists.
 			child1->firstElement = child2->firstElement = 0;
 			child1->lastElement = child2->lastElement = child1->m_objects->size()-1;
+
+			// Save timesplit position for analysis.
+			tssplitsFile << (bbox->bounds4D[1].w+bbox->bounds4D[0].w)/2 << ",";
+			tssplitsFile << minSplitPos << "\n";
 		}
 		child1->parent = bbox;
 		child2->parent = bbox;
@@ -154,6 +160,7 @@ bool checkBbsahmix(BBox *bbox){
 void
 	BVH4DSAHMIX::build(Objects * objs)
 {
+	tssplitsFile.open("C:\\timeSplitFile.txt", std::ios::trunc);
 	m_objects = objs;
 	root = new BBox();
 	root->parent = 0;
@@ -164,10 +171,11 @@ void
 
 	divide(root, 0);
 
-
+	tssplitsFile.close();
 	printf("[-]  Total Bboxes: %d\n", nBoxes);
 	printf("[-]  Total Leafs: %d\n", nLeafs);
 	printf("[-]  Total Time splits: %d\n", tSplits);
+	printf("[-]  Number of duplicate pointers: %d\n", dupPointers);
 	if(true){ // Check 4D BVH for errors?
 		printf("[-]   Checking for errors...\n");
 		if(checkBbsahmix(root))

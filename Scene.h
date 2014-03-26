@@ -65,16 +65,16 @@ protected:
     PhotonMap* pMap;
     bool preCalcDone;
     Vector3 lightPos;
-	Vector3 pixelResult[4000][3000];
+	Vector3 pixelResult[400][300];
 	int samples;
 	int temporalSamples;
 private:
 	Scene() { 
-		m_accStruct_type = ACCSTRUCT_BVHREFIT;
+		m_accStruct_type = ACCSTRUCT_BVH4DSAHMIX;
 		m_accStruct = NULL;
 		preCalcDone = false; 
 		samples = 1;
-		temporalSamples = 16;
+		temporalSamples = 64;
 	};                   // Constructor? (the {} brackets) are needed here.
     // Dont forget to declare these two. You want to make sure they
     // are unaccessable otherwise you may accidently get copies of

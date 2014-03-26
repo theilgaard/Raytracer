@@ -309,7 +309,7 @@ void makeAnimatedSphere(){
 
 	TriangleMesh * object2 = new TriangleMesh;
 	object2->setDefaultMaterial(lightblue);
-	int sceneSelector = 6;
+	int sceneSelector = 2;
 
 	switch(sceneSelector){
 	case 0:

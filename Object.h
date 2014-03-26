@@ -25,8 +25,6 @@ public:
 
     virtual bool intersect(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX) = 0;
-	virtual bool intersectAnimated(HitInfo& result, const Ray& ray,
-                           float tMin = 0.0f, float tMax = MIRO_TMAX) = 0;
 
 protected:
     ShadingModel* m_material;

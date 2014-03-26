@@ -143,7 +143,7 @@ Scene::preCalc()
     m_accStruct->build(&m_objects);
 	m_accStruct->draw();
     int end = glutGet(GLUT_ELAPSED_TIME);
-    printf("[+] Time used to build Acceleration Structure: %i min and %i sec\n", (end - start) / 60000, (end - start) / 1000 % 60);
+    printf("[+] Time used to build Acceleration Structure: %i min, %i sec and %i msec\n", (end - start) / 60000, (end - start) / 1000 % 60, (end - start) % 1000);
     printf("\n");
     fflush(stdout);
 
@@ -225,7 +225,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 
     printf("\n");
     //printf("Time used to raytrace: %i sec\n", (end - start)/1000 );
-    printf("Time used to raytrace: %i min and %i sec\n", (end - start)/60000, ((end - start)/1000) % 60);
+    printf("Time used to raytrace: %i min, %i sec and %i msec\n", (end - start)/60000, ((end - start)/1000) % 60, (end-start)%1000);
     printf("Number of rays: %i\n", nrays);
     printf("Number of ray-box intersections: %i\n", boxints);
     printf("Number of ray-triangle intersections: %i\n", triangleints);

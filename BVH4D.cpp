@@ -55,7 +55,7 @@ void BVH4D::divide(BBox* bbox, int depth)
 				}
 			}
 			// Should we even split?
-			if(minSplitPos > bbox->getbboxCost()){
+			if(minSplitPos > bbox->getbboxCost() && (bbox->lastElement-bbox->firstElement < 5)){
 				bbox->isLeaf = true;
 				nLeafs++;
 				return;
@@ -84,8 +84,10 @@ void BVH4D::divide(BBox* bbox, int depth)
 			for (int i = child2->firstElement; i <= child2->lastElement; ++i) {
 				child2->m_objects->push_back((*bbox->m_objects)[i]);
 			}
+			dupPointers += (bbox->lastElement - bbox->firstElement)*2;
 			child1->firstElement = child2->firstElement = 0;
 			child1->lastElement = child2->lastElement = child1->m_objects->size()-1;
+
 		}
 		child1->parent = bbox;
 		child2->parent = bbox;
@@ -137,10 +139,10 @@ void
 
 	divide(root, 0);
 
-
 	printf("[-]  Total Bboxes: %d\n", nBoxes);
 	printf("[-]  Total Leafs: %d\n", nLeafs);
 	printf("[-]  Total Time splits: %d\n", tSplits);
+	printf("[-]  Number of duplicate pointers: %d\n", dupPointers);
 	if(true){ // Check 4D BVH for errors?
 		printf("[-]   Checking for errors...\n");
 		if(checkBb(root))

@@ -31,8 +31,6 @@ public:
 	virtual void interpolate(float time);
     virtual bool intersect(HitInfo& result, const Ray& ray,
                            float tMin = 0.0f, float tMax = MIRO_TMAX);
-	virtual bool intersectAnimated(HitInfo& result, const Ray& ray,
-                           float tMin = 0.0f, float tMax = MIRO_TMAX);
     virtual void preCalc();
 protected:
 	TriangleMesh::TupleI3 ti3;
