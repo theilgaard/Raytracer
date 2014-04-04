@@ -36,7 +36,10 @@ public:
 		ACCSTRUCT_BVHREFITFULL = 2,
 		ACCSTRUCT_BVH4D = 3,
 		ACCSTRUCT_BVH4DSAH = 4,
-		ACCSTRUCT_BVH4DSAHMIX = 5
+		ACCSTRUCT_BVH4DSAHMIX = 5,
+
+		TRACE_ACCUMULATIVE	= 1001,
+		TRACE_STOCHASTIC	= 1002
     };
 
 	void addObject(Object* pObj)        { m_objects.push_back(pObj); }
@@ -51,6 +54,10 @@ public:
     void openGL(Camera *cam);
 
     void raytraceImage(Camera *cam, Image *img);
+	
+	void stochasticTrace(Camera *cam, Image *img);
+	void accumulativeTrace(Camera *cam, Image *img);
+
     bool trace(HitInfo& minHit, const Ray& ray,
                float tMin = 0.0f, float tMax = MIRO_TMAX) const;
     void setLightPos(Vector3 lightPosition){ lightPos = lightPosition;}
@@ -60,21 +67,23 @@ protected:
 	Objects m_objects;
     AccStructure *m_accStruct;
 	int m_accStruct_type;
+	int m_trace_type;
     PointLights m_lights;
     RectangleLights recLights;
     PhotonMap* pMap;
     bool preCalcDone;
     Vector3 lightPos;
-	Vector3 pixelResult[400][300];
+	Vector3 pixelResult[4000][3000];
 	int samples;
 	int temporalSamples;
 private:
 	Scene() { 
-		m_accStruct_type = ACCSTRUCT_BVH4DSAHMIX;
+		m_accStruct_type = ACCSTRUCT_BVH4DSAH;
 		m_accStruct = NULL;
+		m_trace_type = TRACE_STOCHASTIC;
 		preCalcDone = false; 
 		samples = 1;
-		temporalSamples = 64;
+		temporalSamples = 1;
 	};                   // Constructor? (the {} brackets) are needed here.
     // Dont forget to declare these two. You want to make sure they
     // are unaccessable otherwise you may accidently get copies of

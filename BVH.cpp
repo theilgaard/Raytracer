@@ -55,7 +55,7 @@ void BVH::divide(BBox* bbox, int depth)
 			}
 		}
 		// Should we even split?
-		if(minSplitPos > bbox->getbboxCost()){
+		if(minSplitPos > bbox->getbboxCost() && (bbox->lastElement-bbox->firstElement) < 5){
 			bbox->isLeaf = true;
 			nLeafs++;
 			return;

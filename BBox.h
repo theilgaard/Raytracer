@@ -5,7 +5,7 @@
 
 extern int boxints;
 const float BOXISECTCOST = 1.0f;
-const float OBJECTCOST = 225.0f;
+const float OBJECTCOST = 8.0f;
 
 class BBox {
 public:

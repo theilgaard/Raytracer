@@ -15,21 +15,18 @@ struct objectCmp {
 } cmp4dsah;
 
 
-
+int maxDepth = 0;
 void BVH4DSAH::divide(BBox* bbox, int depth)
 {
+	if(depth > maxDepth) maxDepth = depth;
 	nBoxes++;
-	if (bbox->lastElement - bbox->firstElement  <= 3 || (bbox->bounds4D[1].w - bbox->bounds4D[0].w) <= (1.0f/(temporalSamples))) {
+	if (bbox->lastElement - bbox->firstElement  <= 3 ) {
 		bbox->isLeaf = true;
 		nLeafs++;
 	} else {
 		bbox->isLeaf = false;
 		int axis;		
-		if(temporalSamples == 1){ // Static or motion-blured scene?
-			axis = depth % 3;
-		}else{
-			axis = depth % 4;
-		}
+		axis = depth % 4;
 		BBox* child1 = new BBox();
 		BBox* child2 = new BBox();
 		if(axis != 3){
@@ -58,7 +55,7 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 				}
 			}
 			// Should we even split?
-			if(minSplitCost > bbox->getbboxCost()){
+			if(minSplitCost > bbox->getbboxCost() && (bbox->lastElement-bbox->firstElement) < 5){
 				bbox->isLeaf = true;
 				nLeafs++;
 				return;
@@ -82,8 +79,8 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 			float minTimesplitCost = INFINITY;
 			float minTimeSplitPos;
 			//float tStep = std::max((bbox->bounds4D[1].w - bbox->bounds4D[0].w)/temporalSamples, 0.1f);
-			float tStep = (bbox->bounds4D[1].w - bbox->bounds4D[0].w)/10;
-			for(float i = bbox->bounds4D[0].w; i < bbox->bounds4D[1].w; i += tStep){
+			float tStep = (bbox->bounds4D[1].w - bbox->bounds4D[0].w)/32;
+			for(float i = bbox->bounds4D[0].w+tStep; i < bbox->bounds4D[1].w; i += tStep){
 				float timeSplit = i;
 				child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, timeSplit);
 				child2->calcDimensions4D(bbox->m_objects, timeSplit, bbox->bounds4D[1].w);
@@ -101,7 +98,7 @@ void BVH4DSAH::divide(BBox* bbox, int depth)
 				nLeafs++;
 				return;
 			}
-			//float timeSplit = (bbox->bounds4D[0].w + bbox->bounds4D[1].w)/2.0f;
+
 			child1->calcDimensions4D(bbox->m_objects, bbox->bounds4D[0].w, minTimeSplitPos);
 			child2->calcDimensions4D(bbox->m_objects, minTimeSplitPos, bbox->bounds4D[1].w);
 			// Copy over the primitives for the timesplit children.
@@ -170,7 +167,7 @@ void
 	root->calcDimensions4D(m_objects, 0.0f, 1.0f);
 
 	divide(root, 0);
-
+	printf("Max Depth: %d\n", maxDepth);
 	tssplitsFile.close();
 	printf("[-]  Total Bboxes: %d\n", nBoxes);
 	printf("[-]  Total Leafs: %d\n", nLeafs);

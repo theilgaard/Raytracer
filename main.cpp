@@ -309,7 +309,7 @@ void makeAnimatedSphere(){
 
 	TriangleMesh * object2 = new TriangleMesh;
 	object2->setDefaultMaterial(lightblue);
-	int sceneSelector = 2;
+	int sceneSelector = 6;
 
 	switch(sceneSelector){
 	case 0:
@@ -331,13 +331,13 @@ void makeAnimatedSphere(){
 		g_camera->setViewDir(Vector3(0.967f, -0.254f, -0.033f));
 		break;
 	case 3:
-		object->load("objects/hand_00tri.obj"); // 15855 triangles
+		object->load("objects/hand_00tri.obj"); // 15,855 triangles
 		object2->load("objects/hand_03tri.obj");
 		g_camera->setEye(Vector3(-0.734f, 0.439f, -0.522f));
 		g_camera->setViewDir(Vector3(0.895f, -0.086f, 0.437f));
 		break;
 	case 4:
-		object->load("objects/24cell000tri.obj");	// 122800 triangles
+		object->load("objects/24cell000tri.obj");	// 122,800 triangles
 		object2->load("objects/24cell008tri.obj");
 		g_camera->setEye(Vector3(-10.134f, 1.342f, -5.112f));
 		g_camera->setViewDir(Vector3(0.894f, -0.103f, 0.436f));

@@ -153,7 +153,22 @@ Scene::preCalc()
 void
 Scene::raytraceImage(Camera *cam, Image *img)
 {
-    Ray ray;
+	switch(m_trace_type){
+	case TRACE_STOCHASTIC:
+		stochasticTrace(cam, img);
+		break;
+	case TRACE_ACCUMULATIVE:
+		accumulativeTrace(cam, img);
+		break;
+	default:
+		printf("FATAL, INVALID SCENE TRACE METHOD!\n");
+		exit(1);
+		break;
+	}
+}
+
+void Scene::stochasticTrace(Camera *cam, Image *img){
+	Ray ray;
     HitInfo hitInfo;
     Vector3 shadeResult;
 //    memset(pixelResult, 0, img->width*img->height*sizeof(Vector3));
@@ -162,9 +177,92 @@ Scene::raytraceImage(Camera *cam, Image *img)
 	triangleints = 0;
 	float g = 2.2;
     srand(static_cast <unsigned> (time(0))); // Seed the random numbers. 
+	int start = glutGet(GLUT_ELAPSED_TIME);
+	
+	// loop over all pixels in the image
+	
+		//float time = (rand() / (float)RAND_MAX); // Randomly or uniformly
+	
+	for (int j = 0; j < img->height(); ++j){
+		for (int i = 0; i < img->width(); ++i){
+			Vector3 pixelSum;
+			bool hit = false;
+			for(int t = 0; t < temporalSamples; t++){	// Temporal Stochastic sampling
+				float time = ((double) rand() / (RAND_MAX));
 
-    int start = glutGet(GLUT_ELAPSED_TIME);
-    // loop over all pixels in the image
+        		for(int s = 0; s < samples; s++){			// Stochastic sampling
+					float dx = 0.5 * (rand() / (float)RAND_MAX) - 1.0;
+					float dy = 0.5 * (rand() / (float)RAND_MAX) - 1.0;
+					ray = cam->eyeRay(i + dx, j + dy, img->width(), img->height(), 1.00029, time);
+					nrays++;
+					if (trace(hitInfo, ray))
+					{
+						shadeResult = hitInfo.material->shade(ray, hitInfo, *this, 0, *pMap);
+						pixelSum += shadeResult;
+						hit = true;
+					}
+				}
+        		if(hit){
+					shadeResult = pixelSum / (samples * temporalSamples);
+        		}
+        		else{
+					shadeResult = cam->bgColor();
+        		}
+//				Vector3 result = Vector3(pow(shadeResult.x, 1/ g), pow(shadeResult.y, 1/ g), pow(shadeResult.z, 1/ g));
+				pixelResult[i][j].x += shadeResult.x;
+				pixelResult[i][j].y += shadeResult.y;
+				pixelResult[i][j].z += shadeResult.z;
+			//	img->setPixel(i, j, pixelResult[i][j]);
+			}
+		}
+	//   img->drawScanline(j);
+	//    glFinish();
+			
+		int end = glutGet(GLUT_ELAPSED_TIME);
+		//int est = ((end - start) / (j + 1)) * (img->height() - j - 1);
+		printf("Rendering Progress: %.3f%%\r", (((float)j) / (float)img->height())*100.f);
+		//printf("Estimated time left: %i min and %i sec\r", est/60000, (est/1000) % 60);
+		fflush(stdout);
+	}
+	//openGL(cam); // Outcomment this for (slightly) added performance. 
+    int end = glutGet(GLUT_ELAPSED_TIME);
+
+   for (int j = 0; j < img->height(); ++j){
+        for (int i = 0; i < img->width(); ++i){
+			Vector3 result = Vector3(pow(pixelResult[i][j].x, 1/ g), pow(pixelResult[i][j].y, 1/ g), pow(pixelResult[i][j].z, 1/ g));
+			img->setPixel(i, j, result);
+		}
+		img->drawScanline(j);
+		glFinish();
+	}
+
+	memset(pixelResult,0,(img->height()*sizeof(Vector3))*(img->width()*sizeof(Vector3)));
+
+	printf("Rendering Progress: 100.000%\n");
+
+    printf("\n");
+    //printf("Time used to raytrace: %i sec\n", (end - start)/1000 );
+    printf("Time used to raytrace: %i min, %i sec and %i msec\n", (end - start)/60000, ((end - start)/1000) % 60, (end-start)%1000);
+    printf("Number of rays: %i\n", nrays);
+    printf("Number of ray-box intersections: %i\n", boxints);
+    printf("Number of ray-triangle intersections: %i\n", triangleints);
+	printf("---------------------------------------------\n");
+    fflush(stdout);
+};
+
+void Scene::accumulativeTrace(Camera *cam, Image *img){
+	 Ray ray;
+    HitInfo hitInfo;
+    Vector3 shadeResult;
+//    memset(pixelResult, 0, img->width*img->height*sizeof(Vector3));
+	nrays = 0;
+	boxints = 0;
+	triangleints = 0;
+	float g = 2.2;
+    srand(static_cast <unsigned> (time(0))); // Seed the random numbers. 
+	int start = glutGet(GLUT_ELAPSED_TIME);
+	
+	// loop over all pixels in the image
 	for(int t = 0; t < temporalSamples; t++){	// Temporal Stochastic sampling
 		//float time = (rand() / (float)RAND_MAX); // Randomly or uniformly
 		float time = float(t)/float(temporalSamples);
@@ -210,7 +308,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
 	}
     int end = glutGet(GLUT_ELAPSED_TIME);
 
-    for (int j = 0; j < img->height(); ++j){
+   for (int j = 0; j < img->height(); ++j){
         for (int i = 0; i < img->width(); ++i){
 			Vector3 result = Vector3(pow(pixelResult[i][j].x, 1/ g), pow(pixelResult[i][j].y, 1/ g), pow(pixelResult[i][j].z, 1/ g));
 			img->setPixel(i, j, result);
@@ -218,10 +316,10 @@ Scene::raytraceImage(Camera *cam, Image *img)
 		img->drawScanline(j);
 		glFinish();
 	}
+
 	memset(pixelResult,0,(img->height()*sizeof(Vector3))*(img->width()*sizeof(Vector3)));
 
-
-    printf("Rendering Progress: 100.000%\n");
+	printf("Rendering Progress: 100.000%\n");
 
     printf("\n");
     //printf("Time used to raytrace: %i sec\n", (end - start)/1000 );
@@ -231,7 +329,7 @@ Scene::raytraceImage(Camera *cam, Image *img)
     printf("Number of ray-triangle intersections: %i\n", triangleints);
 	printf("---------------------------------------------\n");
     fflush(stdout);
-}
+};
 
 bool
 Scene::trace(HitInfo& minHit, const Ray& ray, float tMin, float tMax) const
